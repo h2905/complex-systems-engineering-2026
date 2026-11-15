@@ -244,7 +244,7 @@
 
     .project-grid {
       display: grid;
-      grid-template-columns: 1.65fr 0.75fr;
+      grid-template-columns: 1.38fr 1fr 0.55fr;
       gap: 16px;
     }
 
@@ -281,6 +281,23 @@
       content: "";
     }
 
+    .project-card.secondary {
+      background:
+        radial-gradient(circle at 88% 8%, rgba(216, 255, 100, 0.14), transparent 34%),
+        linear-gradient(145deg, #172a2d 0%, #091416 72%);
+    }
+
+    .project-card.secondary::before {
+      border-color: rgba(255, 107, 61, 0.22);
+      box-shadow:
+        0 0 0 70px rgba(255, 107, 61, 0.025),
+        0 0 0 140px rgba(255, 107, 61, 0.012);
+    }
+
+    .project-card.secondary .project-number {
+      color: var(--orange);
+    }
+
     .project-top {
       position: relative;
       z-index: 1;
@@ -308,7 +325,7 @@
       z-index: 1;
       max-width: 820px;
       margin: 0;
-      font: 800 clamp(31px, 3.8vw, 53px)/1.15 var(--display);
+      font: 800 clamp(31px, 3.2vw, 46px)/1.15 var(--display);
       letter-spacing: -0.04em;
     }
 
@@ -524,7 +541,7 @@
             每次作业均使用独立链接，并统一收录在下方作业列表中。
           </p>
           <div class="hero-meta">
-            Updated / 2026.11.08<br>
+            Updated / 2026.11.15<br>
             Archive / GitHub Pages
           </div>
         </div>
@@ -538,7 +555,7 @@
             <div class="section-kicker">Assignment index</div>
             <h2>课程作业</h2>
           </div>
-          <div class="count">01 published<br>更多作业将持续加入</div>
+          <div class="count">02 published<br>更多作业将持续加入</div>
         </div>
 
         <div class="project-grid">
@@ -558,6 +575,28 @@
                 <span class="tag">线控底盘</span>
               </div>
               <a class="open-link" href="./assignments/wire-control-chassis/">
+                打开作业
+                <span aria-hidden="true">→</span>
+              </a>
+            </div>
+          </article>
+
+          <article class="project-card secondary">
+            <div class="project-top">
+              <span class="project-number">ASSIGNMENT / 02</span>
+              <span class="project-date">2026.11.15 · Requirements</span>
+            </div>
+            <h3>
+              从运营意图到<br>可验证需求
+              <span>BRS × StRS for the X-by-wire chassis platform</span>
+            </h3>
+            <div class="project-bottom">
+              <div class="tags">
+                <span class="tag">概念定义</span>
+                <span class="tag">BRS / StRS</span>
+                <span class="tag">ConOps / OpsCon</span>
+              </div>
+              <a class="open-link" href="./assignments/concept-definition/">
                 打开作业
                 <span aria-hidden="true">→</span>
               </a>
