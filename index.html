@@ -244,17 +244,17 @@
 
     .project-grid {
       display: grid;
-      grid-template-columns: 1.38fr 1fr 0.55fr;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 16px;
     }
 
     .project-card {
       position: relative;
-      min-height: 410px;
+      min-height: 500px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: clamp(28px, 4vw, 52px);
+      padding: clamp(28px, 3.2vw, 44px);
       overflow: hidden;
       color: var(--white);
       border-radius: 24px;
@@ -298,6 +298,23 @@
       color: var(--orange);
     }
 
+    .project-card.tertiary {
+      background:
+        radial-gradient(circle at 12% 8%, rgba(119, 232, 223, 0.16), transparent 34%),
+        linear-gradient(145deg, #172a2d 0%, #0a1214 72%);
+    }
+
+    .project-card.tertiary::before {
+      border-color: rgba(119, 232, 223, 0.22);
+      box-shadow:
+        0 0 0 70px rgba(119, 232, 223, 0.025),
+        0 0 0 140px rgba(119, 232, 223, 0.012);
+    }
+
+    .project-card.tertiary .project-number {
+      color: var(--cyan);
+    }
+
     .project-top {
       position: relative;
       z-index: 1;
@@ -325,7 +342,7 @@
       z-index: 1;
       max-width: 820px;
       margin: 0;
-      font: 800 clamp(31px, 3.2vw, 46px)/1.15 var(--display);
+      font: 800 clamp(28px, 2.7vw, 40px)/1.15 var(--display);
       letter-spacing: -0.04em;
     }
 
@@ -533,15 +550,15 @@
         <div class="eyebrow">Complex Systems Engineering · Course Archive</div>
         <h1>
           所有作业，<span>一个入口。</span>
-          <em>持续更新中。</em>
+          <em>一条系统主线。</em>
         </h1>
         <div class="hero-bottom">
           <p class="hero-copy">
-            这里集中展示课程学习过程中的小组讨论、系统分析与设计成果。
-            每次作业均使用独立链接，并统一收录在下方作业列表中。
+            从系统层级、BRS / StRS，到单故障场景的 SyRS、初始架构、STPA 与安全验证。
+            三次作业围绕同一个线控底盘平台逐层收敛，统一收录在下方入口中。
           </p>
           <div class="hero-meta">
-            Updated / 2026.11.15<br>
+            Updated / 2026.11.19<br>
             Archive / GitHub Pages
           </div>
         </div>
@@ -555,7 +572,7 @@
             <div class="section-kicker">Assignment index</div>
             <h2>课程作业</h2>
           </div>
-          <div class="count">02 published<br>更多作业将持续加入</div>
+          <div class="count">03 published<br>完整课程作业链</div>
         </div>
 
         <div class="project-grid">
@@ -603,13 +620,27 @@
             </div>
           </article>
 
-          <aside class="coming">
-            <span class="plus" aria-hidden="true">+</span>
-            <div>
-              <strong>下一份作业，从这里继续。</strong>
-              <p>保留统一的目录与入口结构，方便老师直接浏览每一次课程成果。</p>
+          <article class="project-card tertiary">
+            <div class="project-top">
+              <span class="project-number">ASSIGNMENT / 03</span>
+              <span class="project-date">2026.11.19 · Safety architecture</span>
             </div>
-          </aside>
+            <h3>
+              左前转向失效，<br>底盘如何安全收敛？
+              <span>SyRS × control structure × STPA for fail-operational steering</span>
+            </h3>
+            <div class="project-bottom">
+              <div class="tags">
+                <span class="tag">系统需求规格</span>
+                <span class="tag">初始架构</span>
+                <span class="tag">STPA / 安全验证</span>
+              </div>
+              <a class="open-link" href="./assignments/system-safety-architecture/">
+                打开作业
+                <span aria-hidden="true">→</span>
+              </a>
+            </div>
+          </article>
         </div>
       </div>
     </section>
