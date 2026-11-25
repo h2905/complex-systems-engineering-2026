@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="复杂系统工程作业 04：线控底盘平台运行场景分层、设计条件与安全风险分析">
+  <title>作业 04｜运行场景与风险</title>
+  <link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="site-brand" href="../../"><span class="brand-rule"></span><span>H2905 · 线控底盘平台</span></a>
+    <nav class="site-nav" aria-label="主导航">
+      <a href="../../">四次作业</a>
+      <a href="../../report/">完整汇报</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <header class="doc-hero">
+      <p class="doc-kicker">Assignment 04 · Scenario and risk</p>
+      <h1>运行场景分层、设计条件与安全风险分析</h1>
+      <p class="doc-lead">
+        本作业在线控底盘平台已有需求和架构的基础上，继续回答三个问题：系统会在哪些环境中运行、各层场景由哪些要素构成，以及正常场景受到扰动后可能形成哪些风险场景。
+      </p>
+      <div class="doc-meta">
+        <span>系统：线控底盘平台</span><span>典型场景：城市路口低速左转</span><span>方法：场景分层 / 偏差分析</span><span>版本：2026-11-25</span>
+      </div>
+    </header>
+
+    <section class="doc-section">
+      <h2>1. 分析范围</h2>
+      <div class="summary-grid">
+        <div><small>研究对象</small><strong>L4 城市无人接驳车辆</strong><p>无车内驾驶员完成常规运营，线控底盘平台负责把自动驾驶域的运动意图转换为可控执行。</p></div>
+        <div><small>分析边界</small><strong>正常左转及其扰动</strong><p>从任务进入路口开始，到完成左转、退出路口或进入 MRM 为止。</p></div>
+        <div><small>输出</small><strong>条件 + 场景 + 风险</strong><p>形成运行设计条件、典型场景过程、风险场景列表和需求映射。</p></div>
+      </div>
+      <p class="note">
+        本页使用课程背景下的初始运行条件。所有速度、距离、时间和性能值均用于建立可讨论的验证基线，尚未经过量产标定、法规认证或实车统计验证。
+      </p>
+    </section>
+
+    <section class="doc-section">
+      <h2>2. 场景分层</h2>
+      <p>场景从运营环境向执行模块逐层收敛。上层变化会改变下层任务，下层能力不足也可能使上层任务被迫调整或终止。</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>层级</th><th>层次名称</th><th>具体场景要素</th><th>本作业关注点</th></tr></thead>
+          <tbody>
+            <tr><td>S0</td><td>运营与体系层</td><td>接驳任务、ODD 审批、站点、调度、云控、远程协助、救援、监管、维护计划。</td><td>车辆是否被允许进入该任务，异常后由谁接收事件。</td></tr>
+            <tr><td>S1</td><td>道路与环境层</td><td>城市道路、交叉口类型、车道宽度、坡度和附着；天气、光照、视野；行人、非机动车、机动车和交通信号。</td><td>环境是否仍在 ODD 内，可见性和附着是否改变运动边界。</td></tr>
+            <tr><td>S2</td><td>车辆任务层</td><td>起点与终点、行驶路线、左转动作、目标速度、加减速度、载荷、乘员状态、预期停车位置。</td><td>自动驾驶域为什么要执行左转，计划占用多少时间和空间。</td></tr>
+            <tr><td>S3</td><td>底盘系统层</td><td>NORMAL/DEGRADED/MRM/SAFE_STOP 模式；转向、制动、驱动、悬架指令；健康状态、剩余能力、时延和时间戳。</td><td>平台能否实现任务意图，何时应限速、降级或停止。</td></tr>
+            <tr><td>S4</td><td>执行与模块层</td><td>双转向控制器与电机、制动执行器、轮端驱动、悬架执行器；角度、电流、温度、压力、轮速、电源和通信模块。</td><td>具体故障和退化如何被检测，是否影响最低运动能力。</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="doc-section">
+      <h2>3. 正常运行设计条件</h2>
+      <h3>3.1 运行设计范围</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>类别</th><th>正常运行条件</th><th>超出条件时的处理</th></tr></thead>
+          <tbody>
+            <tr><td>道路</td><td>已批准的城市低速运营道路；信号灯或标志明确；车道宽度不小于 3.25 m；坡度不大于 5%；转弯半径大于 10 m；路面标记和路缘可识别。</td><td>不得进入未批准路段；无法确认路口几何或路权时拒绝任务。</td></tr>
+            <tr><td>交通</td><td>混合交通；存在车辆、行人或非机动车；其他参与者行为应能在预测窗口内被识别和处理。</td><td>高密度冲突、道路封闭或无法解释的交通行为触发减速、停车或任务退出。</td></tr>
+            <tr><td>速度</td><td>常规路段建议不超过 30 km/h；典型左转建议 12–15 km/h；最终阈值按车型、载荷和附着标定。</td><td>超过已声明速度包线时，平台应拒绝继续推进任务。</td></tr>
+            <tr><td>天气与光照</td><td>正常能见度、道路附着良好、无积水或积雪；白天或满足照明要求的夜间。</td><td>雨雪、大雾、积水、低附着力或强逆光时收紧 ODD，必要时停止接单。</td></tr>
+            <tr><td>通信</td><td>允许使用云控和远程协助，但本地运动控制、故障仲裁和 MRM 不依赖公共网络。</td><td>通信中断时保持本地能力，按状态继续完成当前安全动作或停车。</td></tr>
+            <tr><td>能量与热状态</td><td>高压、低压、驱动、制动和控制器温度处于供应商声明范围；制动能力满足当前任务。</td><td>出现热降额、能量不足或制动能力下降时更新剩余能力。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>3.2 系统状态条件</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>条件</th><th>进入任务前的正常状态</th><th>不满足时</th></tr></thead>
+          <tbody>
+            <tr><td>状态</td><td>系统为 NORMAL；无锁存故障；无未确认的健康状态。</td><td>禁止接受载客任务，进入维护或 MRM 流程。</td></tr>
+            <tr><td>自检</td><td>转向 A/B、制动、驱动、悬架、传感器、电源和通信自检通过。</td><td>将相应能力标为不可用，并重新计算可执行任务。</td></tr>
+            <tr><td>一致性</td><td>指令、执行反馈和车辆响应在允许误差内；时间戳新鲜且单调。</td><td>判为未知或故障，不得继续声明 NORMAL。</td></tr>
+            <tr><td>能力声明</td><td>平台能输出当前可用转角、速度上限、制动能力、模式原因和有效时间。</td><td>能力不明确时按“不安全”处理。</td></tr>
+            <tr><td>时间基准</td><td>AD 请求、平台控制、执行反馈和事件记录使用可核对的时间基准。</td><td>时钟异常时标记证据不完整，并收紧功能授权。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>3.3 人员状态条件</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>人员</th><th>正常状态</th><th>职责边界</th></tr></thead>
+          <tbody>
+            <tr><td>车内人员</td><td>正式运营阶段不配置驾驶员；乘客坐稳并系好安全带；车门与站台间隙确认关闭。</td><td>乘客不承担驾驶或故障处置职责。</td></tr>
+            <tr><td>试验安全员</td><td>初始道路验证阶段可由批准的安全员随车，并可使用独立急停装置。</td><td>安全员只处理试验异常，不用于弥补平台日常能力。</td></tr>
+            <tr><td>远程人员</td><td>经过培训，能看到车辆状态、ODD、故障原因和可用处置项；同一人员同时监控的车辆数须经验证。</td><td>远程建议和授权不能绕过本地安全约束、故障锁存和 MRM。</td></tr>
+            <tr><td>运维与救援</td><td>具有车辆隔离、救援入口、能量切断和拖移权限；知道如何读取危险状态。</td><td>救援操作必须在车辆已进入可安全接触状态后进行。</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="doc-section">
+      <h2>4. 典型场景实例：无保护路口低速左转</h2>
+      <p>
+        场景设定为：L4 无人接驳车在半载、干沥青、白天条件下，从直行车道进入无保护左转。车辆接近路口时目标车速为 18 km/h，进入冲突区后降至约 12 km/h。对向存在直行车辆，路口右缘有等待通行的行人和非机动车。
+      </p>
+      <div class="flow">
+        <div class="flow-step"><small>t = −8 s</small><strong>任务与 ODD 校验</strong><p>云控与本地共同确认路段、天气、载荷和任务仍在批准范围。</p></div>
+        <div class="flow-step"><small>t = −5 s</small><strong>路口与冲突识别</strong><p>AD 域输出左转轨迹、对向车辆间隙和行人占用信息。</p></div>
+        <div class="flow-step"><small>t = −2 s</small><strong>平台自检与能力声明</strong><p>双转向通道健康；制动、驱动、悬架正常；状态 NORMAL。</p></div>
+        <div class="flow-step"><small>t = 0 s</small><strong>进入左转</strong><p>曲率约 0.067 m⁻¹；平台分配车轮转角、制动力和姿态目标。</p></div>
+        <div class="flow-step"><small>t = 2–5 s</small><strong>轨迹跟踪</strong><p>持续检查实际转角、横摆角速度和轮速，按侧向加速度调整速度。</p></div>
+        <div class="flow-step"><small>t = 6 s</small><strong>退出路口</strong><p>回正转向，恢复目标速度；记录状态、时延和任务完成事件。</p></div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>环节</th><th>输入</th><th>平台动作</th><th>可观察结果</th></tr></thead>
+          <tbody>
+            <tr><td>接近路口</td><td>目标速度 18 km/h；曲率逐渐增大；前方通行空间可用。</td><td>校验能力，协调制动与能量回收，准备降低车速。</td><td>减速度保持在舒适范围；状态 NORMAL。</td></tr>
+            <tr><td>进入冲突区</td><td>目标速度约 12 km/h；横向路径偏移不超过规划包线。</td><td>将轨迹转为车轮转角；限制转角变化率；调整左右轮驱动。</td><td>实际路径与规划偏差受控；无持续执行器冲突。</td></tr>
+            <tr><td>弯中跟踪</td><td>实际转角、横摆角速度、轮速、侧向加速度和附着估计。</td><td>闭环修正转角；协调驱动与制动；悬架抑制侧倾。</td><td>横摆趋势稳定；乘员冲击与侧倾可接受。</td></tr>
+            <tr><td>退出路口</td><td>目标曲率下降；前方道路恢复可通行。</td><td>平滑回正，逐步恢复速度，更新任务状态。</td><td>无转向残余振荡；事件与指标完成记录。</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">
+        转角、侧向加速度和时间为课程示例，不作为底盘实测值。实际团队应使用车辆参数、轮胎模型和试验数据重新计算。
+      </p>
+    </section>
+
+    <section class="doc-section">
+      <h2>5. 安全风险分析</h2>
+      <p>
+        分析采用“场景要素偏差—风险事件—后果—现有控制”的顺序。偏差包括发生得过早、过晚、未发生、顺序错误或持续时间过长。严重度 S1–S3 分别表示车内可恢复异常、导致交通冲突或 MRM、存在人员伤害或扩大事故的可能；可能性 A–C 分别表示初步判断的低、中、高，后续应由数据验证。
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>编号</th><th>风险场景</th><th>触发偏差</th><th>可能后果</th><th>严重度 / 可能性</th><th>现有控制与待补充项</th></tr></thead>
+          <tbody>
+            <tr><td>RT-01</td><td>对向直行车辆遮挡，系统对通行间隙判断过晚。</td><td>冲突识别延迟；轨迹仍进入左转。</td><td>与对向车辆发生侧向碰撞。</td><td>S3 / B</td><td>在轨迹接口中保留间隙不确定性；低置信度时禁止进入冲突区。</td></tr>
+            <tr><td>RT-02</td><td>行人或非机动车从路口右缘进入规划路径。</td><td>占用预测更新过晚或未进入平台约束。</td><td>挤压、碰撞或非预期急停。</td><td>S3 / B</td><td>限制左转速度，保留横向裕度；无法确认路径时在冲突区前停车。</td></tr>
+            <tr><td>RT-03</td><td>前车在路口入口突然制动。</td><td>制动请求过晚；回馈与液压协同不足。</td><td>追尾、乘员冲击或阻塞路口。</td><td>S2 / B</td><td>准备制动、限制跟车时距；持续监测制动热状态与附着。</td></tr>
+            <tr><td>RT-04</td><td>湿滑路面使车辆偏离左转路径。</td><td>附着估计偏差；轮端扭矩和转角包线未收紧。</td><td>横向稳定性下降或越过车道边界。</td><td>S2 / B</td><td>湿滑条件退出正常 ODD；降低速度和扭矩变化率；悬架与制动协同。</td></tr>
+            <tr><td>RT-05</td><td>左前转向通道在进入路口时失效。</td><td>执行器开路或指令与实际角度持续不一致。</td><td>左转不足或路径突变。</td><td>S3 / B</td><td>双通道健康判断、热备接管、DEGRADED 限速和 MRM。</td></tr>
+            <tr><td>RT-06</td><td>转向反馈卡滞但仍被误判为 NORMAL。</td><td>通信在线；时间戳或指令一致性检查不充分。</td><td>车辆按错误过程模型继续转向。</td><td>S3 / A</td><td>新鲜度、角度、电流和车辆响应多证据一致性判断。</td></tr>
+            <tr><td>RT-07</td><td>备份通道接管产生转角或扭矩阶跃。</td><td>切换过猛；积分饱和或零位不一致。</td><td>非预期横摆、乘员伤害或对对向交通形成威胁。</td><td>S2 / B</td><td>限扭矩、限转角变化率、抗饱和和接管前自检。</td></tr>
+            <tr><td>RT-08</td><td>双通道因共享电源、时钟或通信发生共因失效。</td><td>冗余并未真正独立。</td><td>无转向能力且 MRM 协调受影响。</td><td>S3 / A</td><td>A/B 独立供电和时间源；共因故障检测；独立 MRM 协调器。</td></tr>
+            <tr><td>RT-09</td><td>远程人员延迟确认或被错误状态误导。</td><td>状态信息不完整；网络延迟；越权命令。</td><td>错过停车窗口或采取不适当处置。</td><td>S2 / B</td><td>本地安全逻辑优先；状态包含原因和剩余能力；禁止远程绕过锁存。</td></tr>
+            <tr><td>RT-10</td><td>制动或驱动热降额，平台仍按原能力分配任务。</td><td>能力反馈过晚或未更新。</td><td>制动力不足、轨迹偏差或只能在更差位置停车。</td><td>S2 / B</td><td>持续发布热状态与能力上限；降额后重新规划或拒绝新任务。</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="doc-section">
+      <h2>6. 重点风险与需求闭环</h2>
+      <div class="three-col">
+        <div class="box">
+          <h3>RT-05 / RT-06 转向能力错误</h3>
+          <p>对应 FR-01–FR-05、SAF-01–SAF-06。验证重点是主通道开路、反馈卡滞、备份不可用和共因故障注入。</p>
+        </div>
+        <div class="box">
+          <h3>RT-01 / RT-02 路口冲突</h3>
+          <p>平台不能替代感知与规划，但必须对输入置信度、轨迹可行性和剩余运动能力设置约束。置信度不足时应在冲突区前停车。</p>
+        </div>
+        <div class="box">
+          <h3>RT-03 / RT-04 / RT-10 能力边界</h3>
+          <p>把附着、热状态、制动能力和速度上限纳入实时能力声明；能力下降时先收紧任务，再决定继续、降级或 MRM。</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>场景设计约束</th><th>约束内容</th><th>承接需求</th><th>验证建议</th></tr></thead>
+          <tbody>
+            <tr><td>SCN-01</td><td>只有 ODD、自检、能力声明和健康状态同时满足时，平台才允许进入 NORMAL 并执行左转。</td><td>SR-02、SR-09、SAF-01</td><td>逐项撤销条件，检查 NORMAL 许可与状态反馈。</td></tr>
+            <tr><td>SCN-02</td><td>当规划轨迹超出当前转角、附着或制动能力时，平台应拒绝执行并声明不可实现。</td><td>SR-08、SR-09</td><td>仿真与台架输入超包线轨迹，核对拒绝原因和回退策略。</td></tr>
+            <tr><td>SCN-03</td><td>左转过程中转向能力低于任务需求时，平台应进入 DEGRADED 并限制速度；无法维持最低路径能力时进入 MRM。</td><td>FR-04、FR-05、SAF-04</td><td>在进入、弯中和驶出阶段分别注入单通道故障。</td></tr>
+            <tr><td>SCN-04</td><td>平台能力、热状态或附着估计发生显著变化时，应在规定周期内更新剩余能力。</td><td>SR-02、SR-11</td><td>注入热降额和低附着估计，核对状态更新时间与任务响应。</td></tr>
+            <tr><td>SCN-05</td><td>远程协助和云控不得覆盖本地故障锁存、安全停车和最低运动能力限制。</td><td>SR-03、SR-07</td><td>断链、重放、越权和延迟命令测试。</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="doc-section">
+      <h2>7. 结论与后续工作</h2>
+      <p>
+        城市路口低速左转是连接运营任务、道路冲突、整车轨迹和底盘执行的合适典型场景。正常运行的关键不是单一性能指标，而是平台能否持续判断“当前任务是否还在能力范围内”。反馈未更新、能力未声明和故障未锁存，都可能使系统在看似正常的状态下继续执行不安全的动作。
+      </p>
+      <div class="note warn">
+        后续需要与整车和感知团队确认路口间隙、可见性、附着估计和乘员舒适的量化阈值，并通过仿真、HIL 和封闭场地逐步验证。本次风险等级属于课程阶段初评。
+      </div>
+    </section>
+
+    <nav class="doc-nav" aria-label="作业导航">
+      <a href="../../">← 返回四次作业</a>
+    </nav>
+  </main>
+</body>
+</html>

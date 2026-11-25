@@ -3,1088 +3,126 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="线控底盘平台左前转向执行器失效场景的系统需求规格、初始架构、STPA 安全分析与验证方案">
-  <title>左前转向失效｜系统需求与安全架构</title>
-  <link rel="stylesheet" href="../../assets/assignment3.css">
+  <meta name="description" content="复杂系统工程作业 03：左前转向通道失效下的系统需求、初始架构与 STPA 分析">
+  <title>作业 03｜SyRS 与安全架构</title>
+  <link rel="stylesheet" href="../../assets/site.css">
 </head>
-<body id="top">
-  <a class="skip-link" href="#main">跳到主要内容</a>
-
-  <header class="site-nav">
-    <a class="brand" href="../../">
-      <span class="brand-mark" aria-hidden="true"></span>
-      <span>Course Works / H2905</span>
-    </a>
-    <nav aria-label="主导航">
-      <ul class="nav-links">
-        <li><a href="../../#works">全部作业</a></li>
-        <li><a href="../wire-control-chassis/">作业 01</a></li>
-        <li><a href="../concept-definition/">作业 02</a></li>
-        <li><a class="active" href="./">作业 03</a></li>
-        <li><a href="https://github.com/h2905/complex-systems-engineering-2026">GitHub</a></li>
-      </ul>
+<body>
+  <header class="site-header">
+    <a class="site-brand" href="../../"><span class="brand-rule"></span><span>H2905 · 线控底盘平台</span></a>
+    <nav class="site-nav" aria-label="主导航">
+      <a href="../../">四次作业</a>
+      <a href="../../report/">完整汇报</a>
     </nav>
   </header>
 
-  <main id="main">
-    <section class="hero">
-      <div class="hero-inner">
-        <div>
-          <div class="eyebrow">Assignment 03 / SyRS · Architecture · STPA</div>
-          <h1>
-            左前转向失效，
-            <span>底盘如何安全收敛？</span>
-          </h1>
-          <p class="hero-copy">
-            研究范围限定为
-            <strong>“15 km/h 城市路口左转过程中，左前转向执行通道失效”</strong>
-            这一可注入、可观测、可验证的系统切片：从需求、控制结构、初始架构推进到安全约束与测试证据。
-          </p>
-          <div class="hero-meta">
-            <span class="pill">System / 线控底盘平台</span>
-            <span class="pill">Fail-operational + MRM</span>
-            <span class="pill">2026.11.19</span>
-          </div>
-        </div>
-
-        <div class="hero-visual" aria-hidden="true">
-          <div class="scope-orbit"></div>
-          <div class="scope-card">
-            <small>Focused test slice / 场景切片</small>
-            <h2>15 km/h<br>路口低速左转</h2>
-            <p>初始验证条件：干沥青、转弯半径约 15 m、半载。按车型标定，不把参数当作量产结论。</p>
-            <div class="scope-chain">
-              <div class="scope-node">
-                <strong>AD 意图</strong>
-                <span>轨迹 / 速度 / 停车请求</span>
-              </div>
-              <span class="scope-arrow">→</span>
-              <div class="scope-node fault">
-                <strong>左前通道失效</strong>
-                <span>检测 / 切换 / MRM</span>
-              </div>
-            </div>
-          </div>
-        </div>
+  <main class="wrap">
+    <header class="doc-hero">
+      <p class="doc-kicker">Assignment 03 · SyRS, architecture and STPA</p>
+      <h1>左前转向通道失效下的系统需求与安全架构</h1>
+      <p class="doc-lead">
+        为使需求可验证，本作业把研究对象限定为“15 km/h 城市路口低速左转过程中左前转向执行通道失效”。分析范围覆盖故障检测、仲裁、热备接管、能力声明、MRM 和证据记录。
+      </p>
+      <div class="doc-meta">
+        <span>场景：15 km/h 左转</span><span>故障：左前通道失效</span><span>架构：双通道 + 独立监控</span><span>方法：SyRS / STPA</span>
       </div>
-      <div class="hero-index">Systems layer / Single-fault slice / Academic baseline</div>
+    </header>
+
+    <section class="doc-section">
+      <h2>1. 范围与验收结果</h2>
+      <div class="summary-grid">
+        <div><small>系统边界</small><strong>线控底盘平台</strong><p>从接收 AD 运动请求到执行器控制、状态反馈和事件记录，不包含感知、路径规划与转向器机械本体设计。</p></div>
+        <div><small>故障触发</small><strong>左前通道失能</strong><p>覆盖执行器开路、反馈失效、指令与实际角度持续不一致等可注入故障。</p></div>
+        <div><small>可接受结果</small><strong>降级可控或 MRM</strong><p>不得在失去有效转向能力后继续声明 NORMAL；最终状态应为 DEGRADED 或 MRM。</p></div>
+      </div>
+      <p class="note">
+        初版验证条件为干沥青、转弯半径约 15 m、半载和 15 km/h。50 ms 检测、100 ms 接管、20 km/h 降级上限与 0.3 g MRM 减速度均为待标定基线。
+      </p>
     </section>
 
-    <section class="section" id="scope">
-      <div class="wrap">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">01 / Scope</div>
-            <h2>先把问题缩到<span>一个可以验收的切片。</span></h2>
-          </div>
-          <p class="section-lead">
-            系统边界只覆盖底盘平台对故障的检测、仲裁、冗余接管、能力声明、安全停车和证据记录。
-            感知、路径规划以及转向器机械本体设计均作为外部约束，不纳入系统需求范围。
-          </p>
-        </div>
-
-        <div class="scope-grid">
-          <article class="scope-cell featured">
-            <small>System under study</small>
-            <strong>线控底盘平台</strong>
-            <p>接收 AD 域的轨迹与速度意图，协调双绕组转向通道、制动和驱动；任一时刻都要知道“还能做什么”。</p>
-          </article>
-          <article class="scope-cell">
-            <small>Fault trigger</small>
-            <strong>左前转向通道失能</strong>
-            <p>执行器开路、反馈失效或指令与实际角度持续不一致。具体机械损坏模式不在平台内部展开。</p>
-          </article>
-          <article class="scope-cell">
-            <small>Acceptance result</small>
-            <strong>继续可控或安全停车</strong>
-            <p>不能悄悄退回 NORMAL，也不能在无转向能力时继续加速。最终状态必须是 DEGRADED 或 MRM。</p>
-          </article>
-        </div>
-
-        <div class="boundary-strip">
-          <div class="boundary-box in">
-            <strong>In scope / 系统范围</strong>
-            <p>双通道健康判断、模式仲裁、备份接管、转角指令连续性、安全停车协调、状态反馈与事件记录。</p>
-          </div>
-          <div class="boundary-box out">
-            <strong>Out of scope / 外部边界</strong>
-            <p>感知与路径决策、轮胎与悬架机械设计、量产法规认证、双通道同时物理损毁后的被动安全。</p>
-          </div>
-        </div>
+    <section class="doc-section">
+      <h2>2. 控制结构与初始架构</h2>
+      <div class="flow">
+        <div class="flow-step"><small>AD DOMAIN</small><strong>运动意图</strong><p>曲率、目标速度、加速度上限和安全停车请求。</p></div>
+        <div class="flow-step"><small>HEALTH</small><strong>独立健康判断</strong><p>比较指令、角度、电流、温度和通信新鲜度。</p></div>
+        <div class="flow-step"><small>ARBITRATION</small><strong>锁存式模式仲裁</strong><p>决定 NORMAL、DEGRADED、MRM 或 SAFE_STOP。</p></div>
+        <div class="flow-step"><small>CHANNEL A/B</small><strong>主通道与热备</strong><p>A 通道正常执行；B 通道自检通过且输出受控。</p></div>
+        <div class="flow-step"><small>VEHICLE</small><strong>转向与制动</strong><p>保持转角连续，限制增扭，协调受控减速。</p></div>
+        <div class="flow-step"><small>FEEDBACK</small><strong>状态与证据</strong><p>反馈剩余能力、速度上限、模式原因与事件序列。</p></div>
+      </div>
+      <div class="status-line">
+        <div><small>S0</small><strong>NORMAL</strong><p>双通道有效，正常转向</p></div>
+        <div><small>S1</small><strong>DEGRADED</strong><p>单通道有效，B 接管并限速</p></div>
+        <div><small>S2</small><strong>MRM</strong><p>无有效转向能力，受控停车</p></div>
+        <div><small>S3</small><strong>SAFE_STOP</strong><p>驻车、隔离、通知和维修确认</p></div>
       </div>
     </section>
 
-    <section class="section dark" id="control-structure">
-      <div class="wrap">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">02 / Control structure</div>
-            <h2>谁给指令，谁负责<span>发现失效并收敛风险？</span></h2>
-          </div>
-          <p class="section-lead">
-            控制结构以“外部驾驶意图 → 底盘平台 → 执行器与被控车辆 → 状态反馈”为主闭环；
-            远程运营只处理事件与救援，不能绕过本地安全逻辑。
-          </p>
-        </div>
-
-        <div class="diagram-panel">
-          <div class="diagram-frame">
-            <svg viewBox="0 0 1200 630" role="img" aria-labelledby="control-title control-desc">
-              <title id="control-title">线控底盘转向失效场景的控制结构框图</title>
-              <desc id="control-desc">自动驾驶规划域向线控底盘平台发送运动指令，平台协调转向双通道、制动与驱动，并把状态反馈给规划域和远程运营。</desc>
-              <defs>
-                <marker id="arrow-control" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#0b1415"/>
-                </marker>
-                <marker id="arrow-feedback" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#ff6b3d"/>
-                </marker>
-              </defs>
-              <rect width="1200" height="630" fill="#f9faf5"/>
-
-              <rect x="48" y="82" width="235" height="128" rx="16" fill="#111d20"/>
-              <text x="72" y="113" fill="#d7ff64" font-family="Consolas, monospace" font-size="12" font-weight="700">EXTERNAL / DRIVER</text>
-              <text x="72" y="149" fill="#ffffff" font-family="Microsoft YaHei" font-size="23" font-weight="700">AD 规划与控制域</text>
-              <text x="72" y="177" fill="#aeb7b4" font-family="Microsoft YaHei" font-size="12">轨迹 · 目标速度 · 紧急停车</text>
-
-              <rect x="430" y="154" width="335" height="270" rx="20" fill="#e8eadf" stroke="#0b1415" stroke-width="1.5"/>
-              <text x="455" y="187" fill="#ff6b3d" font-family="Consolas, monospace" font-size="12" font-weight="700">SYSTEM / PLATFORM</text>
-              <text x="455" y="219" fill="#0b1415" font-family="Microsoft YaHei" font-size="24" font-weight="700">线控底盘平台</text>
-              <rect x="455" y="241" width="285" height="47" rx="9" fill="#ffffff" stroke="#cbd0c5"/>
-              <text x="470" y="270" fill="#0b1415" font-family="Microsoft YaHei" font-size="13">运动监督 / 指令转换</text>
-              <rect x="455" y="299" width="285" height="47" rx="9" fill="#ffffff" stroke="#cbd0c5"/>
-              <text x="470" y="328" fill="#0b1415" font-family="Microsoft YaHei" font-size="13">双通道健康判断 / 模式仲裁</text>
-              <rect x="455" y="357" width="285" height="47" rx="9" fill="#fff1e9" stroke="#ff6b3d"/>
-              <text x="470" y="386" fill="#0b1415" font-family="Microsoft YaHei" font-size="13">能力声明 / MRM 协调</text>
-
-              <rect x="895" y="142" width="250" height="300" rx="20" fill="#263a3a"/>
-              <text x="920" y="177" fill="#d7ff64" font-family="Consolas, monospace" font-size="12" font-weight="700">CONTROLLED PROCESS</text>
-              <text x="920" y="211" fill="#ffffff" font-family="Microsoft YaHei" font-size="23" font-weight="700">车辆与环境</text>
-              <text x="920" y="243" fill="#b9c3bf" font-family="Microsoft YaHei" font-size="12">车辆动力学</text>
-              <text x="920" y="269" fill="#b9c3bf" font-family="Microsoft YaHei" font-size="12">道路曲率与附着</text>
-              <text x="920" y="295" fill="#b9c3bf" font-family="Microsoft YaHei" font-size="12">其他交通参与者</text>
-              <line x1="920" y1="321" x2="1118" y2="321" stroke="#4a5e5e"/>
-              <text x="920" y="351" fill="#ffffff" font-family="Microsoft YaHei" font-size="12">观测：转角、横摆率、横向误差</text>
-              <text x="920" y="381" fill="#ffffff" font-family="Microsoft YaHei" font-size="12">输出：路径保持、受控停车</text>
-
-              <rect x="48" y="384" width="235" height="112" rx="16" fill="#ffffff" stroke="#c8cdc3" stroke-dasharray="6 5"/>
-              <text x="72" y="416" fill="#ff6b3d" font-family="Consolas, monospace" font-size="12" font-weight="700">OTHER SYSTEM</text>
-              <text x="72" y="446" fill="#0b1415" font-family="Microsoft YaHei" font-size="19" font-weight="700">远程运营</text>
-              <text x="72" y="471" fill="#66706d" font-family="Microsoft YaHei" font-size="11">接收事件、确认停车、安排救援</text>
-
-              <rect x="442" y="493" width="145" height="88" rx="13" fill="#d7ff64" stroke="#0b1415"/>
-              <text x="463" y="527" fill="#0b1415" font-family="Microsoft YaHei" font-size="15" font-weight="700">转向通道 A</text>
-              <text x="463" y="550" fill="#3f4a25" font-family="Microsoft YaHei" font-size="10">主绕组 / 控制器 A</text>
-
-              <rect x="605" y="493" width="145" height="88" rx="13" fill="#edffaf" stroke="#0b1415"/>
-              <text x="626" y="527" fill="#0b1415" font-family="Microsoft YaHei" font-size="15" font-weight="700">转向通道 B</text>
-              <text x="626" y="550" fill="#3f4a25" font-family="Microsoft YaHei" font-size="10">热备绕组 / 控制器 B</text>
-
-              <rect x="768" y="493" width="145" height="88" rx="13" fill="#ffffff" stroke="#0b1415"/>
-              <text x="789" y="527" fill="#0b1415" font-family="Microsoft YaHei" font-size="15" font-weight="700">制动 / 驱动</text>
-              <text x="789" y="550" fill="#66706d" font-family="Microsoft YaHei" font-size="10">减速与停车协调</text>
-
-              <path d="M283 145 H390 V224 H430" fill="none" stroke="#0b1415" stroke-width="2.2" marker-end="url(#arrow-control)"/>
-              <text x="300" y="132" fill="#0b1415" font-family="Microsoft YaHei" font-size="11">控制动作</text>
-              <path d="M765 289 H895" fill="none" stroke="#0b1415" stroke-width="2.2" marker-end="url(#arrow-control)"/>
-              <text x="790" y="275" fill="#0b1415" font-family="Microsoft YaHei" font-size="10">运动指令</text>
-              <path d="M598 424 V493" fill="none" stroke="#0b1415" stroke-width="2" marker-end="url(#arrow-control)"/>
-              <path d="M680 424 V470 H840 V470 V493" fill="none" stroke="#0b1415" stroke-width="2" marker-end="url(#arrow-control)"/>
-              <path d="M980 548 H1140 V442" fill="none" stroke="#0b1415" stroke-width="2" marker-end="url(#arrow-control)"/>
-              <path d="M895 356 H850 V405 H765" fill="none" stroke="#ff6b3d" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#arrow-feedback)"/>
-              <text x="806" y="395" fill="#ff6b3d" font-family="Microsoft YaHei" font-size="10">状态反馈</text>
-              <path d="M895 191 H790 V171 H765" fill="none" stroke="#ff6b3d" stroke-width="2" stroke-dasharray="7 5" marker-end="url(#arrow-feedback)"/>
-              <path d="M283 440 H430 V380" fill="none" stroke="#6b7672" stroke-width="1.8" stroke-dasharray="5 5" marker-end="url(#arrow-control)"/>
-              <text x="302" y="427" fill="#66706d" font-family="Microsoft YaHei" font-size="10">事件与证据</text>
-
-              <text x="48" y="610" fill="#6b7672" font-family="Microsoft YaHei" font-size="11">实线：控制动作　虚线：状态 / 证据反馈　橙色：安全相关反馈</text>
-            </svg>
-          </div>
-          <div class="diagram-note">
-            <span><strong>控制动作：</strong>轨迹、目标速度、转向与停车请求。</span>
-            <span><strong>关键反馈：</strong>实际转角、通道健康、剩余能力、事件序号。</span>
-          </div>
-        </div>
-
-        <div class="context-grid">
-          <div class="context-card">
-            <small>01 / COMMAND</small>
-            <strong>平台接收“意图”，不重做规划</strong>
-            <p>AD 域仍对轨迹和停车位置负责；平台负责把意图转换为可实现、受到安全约束的执行指令。</p>
-          </div>
-          <div class="context-card">
-            <small>02 / AUTHORITY</small>
-            <strong>安全模式具有最高优先级</strong>
-            <p>远程或上层命令不能覆盖本地故障锁存、硬件使能和最小风险停车逻辑。</p>
-          </div>
-          <div class="context-card">
-            <small>03 / FEEDBACK</small>
-            <strong>反馈必须描述“剩余能力”</strong>
-            <p>只报告正常/故障不够；还要声明可用转角、速度上限、模式、原因与时间戳。</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="syrs">
-      <div class="wrap">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">03 / System requirements</div>
-            <h2>系统需求规格书<span>只写能实现、能验证的部分。</span></h2>
-          </div>
-          <p class="section-lead">
-            参照 ISO/IEC/IEEE 29148:2018 的 SyRS 组织方式，对单故障场景做裁剪。
-            每条需求都带编号、来源、验收方向和验证方法，便于后续进入架构分配与测试。
-          </p>
-        </div>
-
-        <div class="doc-shell">
-          <aside class="doc-index">
-            <small>SYRS / FOCUSED BASELINE</small>
-            <strong>系统需求规格书</strong>
-            <p>单故障场景裁剪版，不是整车完整量产需求规格。</p>
-            <nav aria-label="需求章节">
-              <a href="#purpose"><span>01</span>目的与概述</a>
-              <a href="#references"><span>02</span>参考与约束</a>
-              <a href="#interface"><span>03</span>外部接口</a>
-              <a href="#functional"><span>04</span>功能与性能</a>
-              <a href="#safety-req"><span>05</span>安全需求</a>
-              <a href="#verification"><span>06</span>验证与追溯</a>
-            </nav>
-          </aside>
-
-          <div class="doc-main">
-            <div class="doc-header">
-              <div>
-                <small>SYS-STR-FAIL-001 / Revision 0.1</small>
-                <h3>线控底盘转向单通道失效<br>系统需求规格</h3>
-              </div>
-              <div class="doc-code">
-                Scope: 15 km/h left turn<br>
-                Owner: Chassis platform<br>
-                Baseline: 2026.11.19
-              </div>
-            </div>
-
-            <div class="doc-body">
-              <section class="doc-section" id="purpose">
-                <h4><span>1</span>文件目的与系统概述</h4>
-                <p>
-                  本规格定义线控底盘平台在“15 km/h 城市路口低速左转、左前转向执行通道失效”条件下的系统需求基线，
-                  用于需求评审、架构分配、STPA 分析、故障注入测试和后续变更控制。
-                </p>
-                <div class="interface-grid">
-                  <div class="interface-card">
-                    <small>PRODUCT PURPOSE</small>
-                    <strong>维持可控运动或安全收敛</strong>
-                    <span>单通道失效后由热备通道接管；无有效转向能力时进入 MRM，完成受控减速和驻车。</span>
-                  </div>
-                  <div class="interface-card">
-                    <small>OPERATING ENVIRONMENT</small>
-                    <strong>低速路口左转</strong>
-                    <span>初始验证条件为干沥青、转弯半径约 15 m、半载、车速 15 km/h。</span>
-                  </div>
-                  <div class="interface-card">
-                    <small>PRIMARY USERS</small>
-                    <strong>需求、控制、安全与测试人员</strong>
-                    <span>AD 规划域使用状态与能力反馈；维护人员使用故障记录完成隔离和恢复确认。</span>
-                  </div>
-                  <div class="interface-card">
-                    <small>LIFECYCLE USE</small>
-                    <strong>设计、验证与变更基线</strong>
-                    <span>需求编号用于架构分配和测试追溯；阈值变更必须重新验证并更新基线版本。</span>
-                  </div>
-                </div>
-              </section>
-
-              <section class="doc-section" id="references">
-                <h4><span>2</span>参考文件、术语与约束</h4>
-                <p>
-                  文件结构参照 ISO/IEC/IEEE 29148:2018 的 SyRS 范例；系统背景承接作业 01 的层级分析、作业 02 的 BRS/StRS，
-                  以及 SR-09、SR-10 和 SC-05 中关于关键执行通道故障与最低风险机动的需求。
-                </p>
-                <ul>
-                  <li><strong>NORMAL：</strong>双转向通道有效，平台允许正常转向和速度请求。</li>
-                  <li><strong>DEGRADED：</strong>单一转向通道有效，平台限制速度和剩余运动能力。</li>
-                  <li><strong>MRM：</strong>最小风险机动，平台禁止新任务并协调受控减速和驻车。</li>
-                  <li><strong>SAFE_STOP：</strong>车辆停止并驻车，故障通道被隔离，等待维修确认。</li>
-                  <li><strong>假设：</strong>AD 规划域提供带时间戳且满足接口约束的运动请求；转向器机械本体、轮胎和道路附着模型由整车边界提供。</li>
-                  <li><strong>约束：</strong>双通道的供电、通信、计算与时间源能够独立配置；任何未确认状态均按不安全状态处理。</li>
-                  <li><strong>适用范围：</strong>人机视觉可用性、娱乐功能和数据库容量不属于本故障控制切片；状态语义、故障提示和日志完整性仍受接口与数据需求约束。</li>
-                </ul>
-              </section>
-
-              <section class="doc-section" id="interface">
-                <h4><span>3</span>外部接口与系统边界</h4>
-                <p>
-                  接口先定义逻辑内容与超时行为，不预设供应商总线。任何输入超过允许时限都必须被视为“不可用”，
-                  而不是沿用最后一次有效值继续正常行驶。
-                </p>
-                <div class="interface-grid">
-                  <div class="interface-card">
-                    <small>IN / AD_REQUEST</small>
-                    <strong>AD 运动请求</strong>
-                    <span>曲率 κ、目标速度、加速度上限、MRM 请求；建议 50 Hz，超时 50 ms 触发能力降级。</span>
-                  </div>
-                  <div class="interface-card">
-                    <small>IN / STEER_FB_A+B</small>
-                    <strong>双通道转角与故障反馈</strong>
-                    <span>实际角度、电机电流、扭矩、温度、有效位；建议 100 Hz，并携带单调时间戳。</span>
-                  </div>
-                  <div class="interface-card">
-                    <small>OUT / CHASSIS_STATUS</small>
-                    <strong>模式与剩余能力</strong>
-                    <span>NORMAL / DEGRADED / MRM / SAFE_STOP、可用转角、速度上限、故障码。</span>
-                  </div>
-                  <div class="interface-card">
-                    <small>OUT / STOP_REQUEST</small>
-                    <strong>制动与驱动协调</strong>
-                    <span>目标减速度、驱动扭矩上限、驻车请求；与平台状态使用同一时间基准。</span>
-                  </div>
-                </div>
-              </section>
-
-              <section class="doc-section" id="functional">
-                <h4><span>4</span>功能、性能与数据需求</h4>
-                <div class="req-table-wrap">
-                  <table class="req-table">
-                    <thead>
-                      <tr>
-                        <th>ID</th>
-                        <th>需求陈述</th>
-                        <th>初始验收值</th>
-                        <th>验证</th>
-                        <th>追溯</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td class="req-id">FR-01</td>
-                        <td>平台应同时监测两个转向通道的指令、实际角度、电流、使能状态与通信新鲜度，并区分“有效、降级、未知、故障”。</td>
-                        <td>两类以上独立证据不一致时，不得保持“有效”。</td>
-                        <td>T</td>
-                        <td>SR-09 / H-01</td>
-                      </tr>
-                      <tr>
-                        <td class="req-id">FR-02</td>
-                        <td>主转向通道失效时，平台应锁存故障、阻止错误指令继续下发，并切换到已通过自检的热备通道。</td>
-                        <td>故障后不自动返回 NORMAL。</td>
-                        <td>T</td>
-                        <td>SC-01 / SC-02</td>
-                      </tr>
-                      <tr>
-                        <td class="req-id">FR-03</td>
-                        <td>切换过程中，平台应保持转角目标与车辆当前横摆趋势连续，禁止产生阶跃式转向修正。</td>
-                        <td>控制周期 10 ms；切换不得触发驱动扭矩增加。</td>
-                        <td>T / A</td>
-                        <td>SC-03</td>
-                      </tr>
-                      <tr>
-                        <td class="req-id">FR-04</td>
-                        <td>仅有一个有效转向通道时，平台应进入 DEGRADED，限制车速并提供可实现的转向能力。</td>
-                        <td>建议车速上限 20 km/h，具体值按整车标定。</td>
-                        <td>T</td>
-                        <td>UCA-04 / SC-04</td>
-                      </tr>
-                      <tr>
-                        <td class="req-id">FR-05</td>
-                        <td>没有有效转向通道或备份通道不可用时，平台应拒绝新任务、进入 MRM，并协调制动、驱动和驻车。</td>
-                        <td>MRM 命令应在 100 ms 内发出；减速度建议不超过 0.3 g。</td>
-                        <td>T</td>
-                        <td>UCA-05 / SC-05</td>
-                      </tr>
-                      <tr>
-                        <td class="req-id">PR-01</td>
-                        <td>平台应以固定周期完成健康判断、模式仲裁和转向指令更新。</td>
-                        <td>控制周期 10 ms，抖动目标小于 1 ms。</td>
-                        <td>T</td>
-                        <td>时序需求</td>
-                      </tr>
-                      <tr>
-                        <td class="req-id">PR-02</td>
-                        <td>从注入单通道开路故障到平台发布降级状态的时间应受控。</td>
-                        <td>建议检测时间不超过 50 ms。</td>
-                        <td>T</td>
-                        <td>UCA-01 / SC-01</td>
-                      </tr>
-                      <tr>
-                        <td class="req-id">PR-03</td>
-                        <td>热备通道应在明确的执行时序内接管，并保持指令连续性。</td>
-                        <td>建议接管完成时间不超过 100 ms。</td>
-                        <td>T</td>
-                        <td>UCA-02 / SC-03</td>
-                      </tr>
-                      <tr>
-                        <td class="req-id">DR-01</td>
-                        <td>平台应记录故障码、模式迁移前后状态、双通道反馈、指令序列和统一时间戳。</td>
-                        <td>一次测试可由事件序列独立重建。</td>
-                        <td>I / T</td>
-                        <td>BR-07 / SR-11</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div class="note">
-                  50 ms、100 ms、20 km/h、0.3 g 为初始验收基线，须由整车动力学、安全目标和基线测试继续确认，不构成法规或量产结论。
-                </div>
-              </section>
-
-              <section class="doc-section" id="safety-req">
-                <h4><span>5</span>安全相关需求</h4>
-                <ul>
-                  <li><strong>SAF-01：</strong>任一通道健康状态为“未知”时，平台不得声明 NORMAL。</li>
-                  <li><strong>SAF-02：</strong>已发生的转向故障必须锁存；未经维修确认和重新自检不得恢复 NORMAL。</li>
-                  <li><strong>SAF-03：</strong>双通道不得共享单一电源、单一通信路径或单一时间源；共性故障必须可检测。</li>
-                  <li><strong>SAF-04：</strong>转向备份不可用时，平台必须进入 MRM，且禁止提高驱动扭矩。</li>
-                  <li><strong>SAF-05：</strong>任何模式迁移都应由硬件使能门和软件仲裁共同放行，不能只依赖应用层布尔变量。</li>
-                  <li><strong>SAF-06：</strong>热备接管期间必须限制驱动扭矩和转角变化速率，并保持转角反馈闭环。</li>
-                </ul>
-              </section>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="architecture">
-      <div class="wrap">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">04 / Initial architecture</div>
-            <h2>架构不是堆模块，<span>而是把故障隔离路径画出来。</span></h2>
-          </div>
-          <p class="section-lead">
-            初始架构采用“双控制器 + 双绕组 + 双反馈 + 独立安全监控”的基线。
-            两个通道可以在同一机械执行器包内，但供电、控制与通信路径必须能独立证明。
-          </p>
-        </div>
-
-        <div class="arch-layout">
-          <div class="arch-board">
-            <svg viewBox="0 0 1080 720" role="img" aria-labelledby="arch-title arch-desc">
-              <title id="arch-title">线控底盘转向失效场景的初始系统架构</title>
-              <desc id="arch-desc">自动驾驶域通过网关进入底盘平台，平台含运动监督、时间同步、双通道健康判断、模式仲裁、转向控制和 MRM 协调，连接双绕组执行器、传感器、制动驱动与事件记录。</desc>
-              <defs>
-                <marker id="arch-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
-                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#0b1415"/>
-                </marker>
-              </defs>
-              <rect width="1080" height="720" fill="#f9faf5"/>
-
-              <rect x="42" y="42" width="260" height="98" rx="14" fill="#111d20"/>
-              <text x="66" y="73" fill="#d7ff64" font-family="Consolas, monospace" font-size="11">AD / EXTERNAL</text>
-              <text x="66" y="103" fill="#ffffff" font-family="Microsoft YaHei" font-size="19" font-weight="700">轨迹与安全停车请求</text>
-              <text x="66" y="124" fill="#a9b4b0" font-family="Microsoft YaHei" font-size="10">κ / v_ref / a_limit / MRM</text>
-
-              <rect x="42" y="176" width="844" height="382" rx="22" fill="#eef0e7" stroke="#b8beb4"/>
-              <text x="68" y="208" fill="#ff6b3d" font-family="Consolas, monospace" font-size="11" font-weight="700">CHASSIS PLATFORM BOUNDARY</text>
-
-              <rect x="78" y="233" width="223" height="74" rx="10" fill="#ffffff" stroke="#c6ccc2"/>
-              <text x="96" y="261" fill="#0b1415" font-family="Microsoft YaHei" font-size="14" font-weight="700">接口网关 / 时间同步</text>
-              <text x="96" y="284" fill="#66706d" font-family="Microsoft YaHei" font-size="10">输入校验 · 新鲜度 · 统一时基</text>
-
-              <rect x="331" y="233" width="223" height="74" rx="10" fill="#ffffff" stroke="#c6ccc2"/>
-              <text x="349" y="261" fill="#0b1415" font-family="Microsoft YaHei" font-size="14" font-weight="700">运动监督</text>
-              <text x="349" y="284" fill="#66706d" font-family="Microsoft YaHei" font-size="10">意图转换 · 速度与转角目标</text>
-
-              <rect x="584" y="233" width="260" height="74" rx="10" fill="#fff1e9" stroke="#ff6b3d"/>
-              <text x="602" y="261" fill="#0b1415" font-family="Microsoft YaHei" font-size="14" font-weight="700">健康判断 / 模式仲裁</text>
-              <text x="602" y="284" fill="#66706d" font-family="Microsoft YaHei" font-size="10">证据融合 · 状态锁存 · 能力声明</text>
-
-              <rect x="78" y="354" width="223" height="92" rx="10" fill="#d7ff64" stroke="#0b1415"/>
-              <text x="96" y="384" fill="#0b1415" font-family="Microsoft YaHei" font-size="15" font-weight="700">转向控制器 A</text>
-              <text x="96" y="407" fill="#405025" font-family="Microsoft YaHei" font-size="10">主动控制 · 绕组 A</text>
-              <text x="96" y="426" fill="#405025" font-family="Microsoft YaHei" font-size="10">独立电源 / 通信 A</text>
-
-              <rect x="331" y="354" width="223" height="92" rx="10" fill="#edffaf" stroke="#0b1415"/>
-              <text x="349" y="384" fill="#0b1415" font-family="Microsoft YaHei" font-size="15" font-weight="700">转向控制器 B</text>
-              <text x="349" y="407" fill="#405025" font-family="Microsoft YaHei" font-size="10">热备接管 · 绕组 B</text>
-              <text x="349" y="426" fill="#405025" font-family="Microsoft YaHei" font-size="10">独立电源 / 通信 B</text>
-
-              <rect x="584" y="354" width="260" height="92" rx="10" fill="#111d20"/>
-              <text x="602" y="384" fill="#d7ff64" font-family="Microsoft YaHei" font-size="15" font-weight="700">MRM / 安全停车协调</text>
-              <text x="602" y="407" fill="#d8dedd" font-family="Microsoft YaHei" font-size="10">禁止增扭 · 受控减速 · 驻车</text>
-              <text x="602" y="426" fill="#d8dedd" font-family="Microsoft YaHei" font-size="10">远程事件通知</text>
-
-              <rect x="78" y="477" width="766" height="54" rx="9" fill="#ffffff" stroke="#c6ccc2"/>
-              <text x="96" y="509" fill="#0b1415" font-family="Microsoft YaHei" font-size="13" font-weight="700">事件记录与证据链</text>
-              <text x="270" y="509" fill="#66706d" font-family="Microsoft YaHei" font-size="10">原始反馈快照 · 指令序列 · 模式迁移 · 故障码 · 单调时间戳</text>
-
-              <rect x="915" y="171" width="123" height="145" rx="14" fill="#263a3a"/>
-              <text x="936" y="204" fill="#d7ff64" font-family="Consolas, monospace" font-size="10">PLANT</text>
-              <text x="936" y="233" fill="#ffffff" font-family="Microsoft YaHei" font-size="15" font-weight="700">双绕组</text>
-              <text x="936" y="256" fill="#ffffff" font-family="Microsoft YaHei" font-size="15" font-weight="700">转向执行器</text>
-              <text x="936" y="286" fill="#b8c2bf" font-family="Microsoft YaHei" font-size="9">转角 / 扭矩 / 电流</text>
-
-              <rect x="915" y="337" width="123" height="109" rx="14" fill="#ffffff" stroke="#b8beb4"/>
-              <text x="936" y="367" fill="#ff6b3d" font-family="Consolas, monospace" font-size="10">SENSORS</text>
-              <text x="936" y="395" fill="#0b1415" font-family="Microsoft YaHei" font-size="14" font-weight="700">双反馈</text>
-              <text x="936" y="420" fill="#66706d" font-family="Microsoft YaHei" font-size="9">角度 · 横摆率</text>
-
-              <rect x="915" y="468" width="123" height="117" rx="14" fill="#ffffff" stroke="#b8beb4"/>
-              <text x="936" y="498" fill="#ff6b3d" font-family="Consolas, monospace" font-size="10">FALLBACK</text>
-              <text x="936" y="526" fill="#0b1415" font-family="Microsoft YaHei" font-size="14" font-weight="700">制动 / 驱动</text>
-              <text x="936" y="551" fill="#66706d" font-family="Microsoft YaHei" font-size="9">减速 · 扭矩限制</text>
-
-              <path d="M302 91 H378 V233" fill="none" stroke="#0b1415" stroke-width="2" marker-end="url(#arch-arrow)"/>
-              <path d="M301 270 H331" fill="none" stroke="#0b1415" stroke-width="2" marker-end="url(#arch-arrow)"/>
-              <path d="M554 270 H584" fill="none" stroke="#0b1415" stroke-width="2" marker-end="url(#arch-arrow)"/>
-              <path d="M714 307 V331 H190 V354" fill="none" stroke="#0b1415" stroke-width="2" marker-end="url(#arch-arrow)"/>
-              <path d="M714 331 V331 H443 V354" fill="none" stroke="#0b1415" stroke-width="2" marker-end="url(#arch-arrow)"/>
-              <path d="M714 307 V354" fill="none" stroke="#0b1415" stroke-width="2" marker-end="url(#arch-arrow)"/>
-              <path d="M190 446 V477" fill="none" stroke="#0b1415" stroke-width="1.6" marker-end="url(#arch-arrow)"/>
-              <path d="M443 446 V477" fill="none" stroke="#0b1415" stroke-width="1.6" marker-end="url(#arch-arrow)"/>
-              <path d="M844 401 H875 V240 H915" fill="none" stroke="#0b1415" stroke-width="2" marker-end="url(#arch-arrow)"/>
-              <path d="M915 392 H875 V410 H844" fill="none" stroke="#ff6b3d" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#arch-arrow)"/>
-              <path d="M844 521 H880 V536 H915" fill="none" stroke="#0b1415" stroke-width="2" marker-end="url(#arch-arrow)"/>
-
-              <text x="42" y="614" fill="#0b1415" font-family="Microsoft YaHei" font-size="14" font-weight="700">独立性约束</text>
-              <text x="42" y="642" fill="#66706d" font-family="Microsoft YaHei" font-size="11">A/B 通道不得共享单一路径到执行器；共性机械、供电和时钟风险进入后续安全分析。</text>
-              <rect x="42" y="663" width="360" height="25" rx="5" fill="#d7ff64"/>
-              <text x="54" y="680" fill="#304018" font-family="Consolas, monospace" font-size="10">POWER-A / COMM-A / CLOCK-A</text>
-              <rect x="414" y="663" width="360" height="25" rx="5" fill="#edffaf"/>
-              <text x="426" y="680" fill="#304018" font-family="Consolas, monospace" font-size="10">POWER-B / COMM-B / CLOCK-B</text>
-            </svg>
-          </div>
-
-          <div class="arch-list">
-            <div class="arch-item">
-              <small>A</small>
-              <div><strong>主控制通道</strong><p>执行正常转向闭环；其自检、温度和指令一致性必须持续可见。</p></div>
-            </div>
-            <div class="arch-item">
-              <small>B</small>
-              <div><strong>热备控制通道</strong><p>同步运行但扭矩输出受控；只有仲裁器确认接管后才获得执行权。</p></div>
-            </div>
-            <div class="arch-item">
-              <small>H</small>
-              <div><strong>独立健康判断</strong><p>不只看通信在线，还要比较指令、实际转角、电流和车辆响应。</p></div>
-            </div>
-            <div class="arch-item">
-              <small>M</small>
-              <div><strong>锁存式模式仲裁</strong><p>一旦降级，不经维修确认和重新自检不得回到 NORMAL。</p></div>
-            </div>
-            <div class="arch-item">
-              <small>R</small>
-              <div><strong>MRM 与证据记录</strong><p>协调减速、禁止增扭、驻车、远程通知和事件序列保存。</p></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="state-rail" aria-label="系统状态迁移">
-          <div class="state-cell"><small>S0</small><strong>NORMAL</strong><span>双通道有效，正常转向</span></div>
-          <div class="state-cell"><small>S1</small><strong>DEGRADED</strong><span>单通道失效，B 接管，限速</span></div>
-          <div class="state-cell"><small>S2</small><strong>MRM</strong><span>无有效转向能力，受控停车</span></div>
-          <div class="state-cell"><small>S3</small><strong>SAFE_STOP</strong><span>驻车、隔离、通知与维修确认</span></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section dark" id="stpa">
-      <div class="wrap">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">05 / STPA</div>
-            <h2>从危险出发，追问<span>哪一个控制动作不该发生？</span></h2>
-          </div>
-          <p class="section-lead">
-            STPA 关注控制器、控制动作、反馈和过程模型。这里只分析左前通道失效这一条路径，
-            重点识别“继续正常输出、错误切换、切换过猛、失效后继续加速”等不安全控制行为。
-          </p>
-        </div>
-
-        <div class="stpa-board">
-          <article class="stpa-column">
-            <header><h3>损失与危险</h3><span>LOSS / HAZARD</span></header>
-            <div class="stpa-item">
-              <small>L-1</small>
-              <strong>乘员或其他道路参与者受伤</strong>
-              <p>车辆在路口失去预期路径或发生非预期运动。</p>
-            </div>
-            <div class="stpa-item">
-              <small>L-2</small>
-              <strong>车辆阻塞路口或造成二次事故</strong>
-              <p>故障后停在不可接受位置，或未及时向其他参与者可预测地收敛。</p>
-            </div>
-            <div class="stpa-item">
-              <small>H-01</small>
-              <strong>低速左转时无法维持预期横向路径</strong>
-              <p>转向能力不足但仍被系统视为可正常执行。</p>
-            </div>
-            <div class="stpa-item">
-              <small>H-02</small>
-              <strong>故障切换产生非预期转向或横摆</strong>
-              <p>备份接管瞬间发生扭矩冲突、积分饱和或大角度修正。</p>
-            </div>
-          </article>
-
-          <article class="stpa-column">
-            <header><h3>不安全控制动作</h3><span>UCA</span></header>
-            <div class="stpa-item">
-              <small>UCA-01 / PROVIDED</small>
-              <strong>健康状态未知时仍发布 NORMAL 和正常速度指令</strong>
-              <p>错误过程模型把“通信在线”误当作“执行器可用”。</p>
-            </div>
-            <div class="stpa-item">
-              <small>UCA-02 / TOO EARLY</small>
-              <strong>B 通道尚未完成自检或标定校验时提前授予执行权</strong>
-              <p>备份方向或零位错误，切换本身成为新风险。</p>
-            </div>
-            <div class="stpa-item">
-              <small>UCA-03 / ORDER / TIMING</small>
-              <strong>接管时未先限制驱动扭矩，就输出大转角修正</strong>
-              <p>车辆响应放大，可能造成横向冲击或失稳。</p>
-            </div>
-            <div class="stpa-item">
-              <small>UCA-04 / NOT PROVIDED</small>
-              <strong>无有效转向通道时继续驱动，未进入 MRM</strong>
-              <p>车速持续增加，可用停车距离和路径裕度不断缩小。</p>
-            </div>
-            <div class="stpa-item">
-              <small>UCA-05 / TOO LATE</small>
-              <strong>确认无有效转向能力后未及时禁止增扭并请求 MRM</strong>
-              <p>虽然最终允许停车，但延迟响应会压缩减速距离并扩大路口风险。</p>
-            </div>
-          </article>
-
-          <article class="stpa-column">
-            <header><h3>因果场景与约束</h3><span>CAUSE / CONSTRAINT</span></header>
-            <div class="stpa-item">
-              <small>CS-01 → SC-01</small>
-              <strong>反馈陈旧或被错误复用</strong>
-              <p>强制新鲜度校验与多证据一致性；任一项为未知，NORMAL 被禁止。</p>
-            </div>
-            <div class="stpa-item">
-              <small>CS-02 → SC-02</small>
-              <strong>A/B 共享电源、通信或时钟</strong>
-              <p>独立供电路径、通道与时间源；共性故障必须被监控并进入降级。</p>
-            </div>
-            <div class="stpa-item">
-              <small>CS-03 → SC-03</small>
-              <strong>接管过程发生力矩冲突与积分饱和</strong>
-              <p>切换前清零/冻结积分，执行抗饱和、速率限制和扭矩渐入。</p>
-            </div>
-            <div class="stpa-item">
-              <small>CS-04 → SC-04</small>
-              <strong>操作者或上层系统误以为仍可正常行驶</strong>
-              <p>状态反馈必须给出可用转角与速度上限；DEGRADED 应立即限速和禁止增扭。</p>
-            </div>
-            <div class="stpa-item">
-              <small>CS-05 → SC-05</small>
-              <strong>无有效转向能力时仍等待更优决策</strong>
-              <p>由独立的 MRM 协调器直接请求制动、保持驻车准备并通知远程运营。</p>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="safety-architecture">
-      <div class="wrap">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">06 / Safety architecture</div>
-            <h2>把安全需求落到<span>硬件使能、独立监控和锁存状态。</span></h2>
-          </div>
-          <p class="section-lead">
-            安全架构强调“未知即不安全”：健康状态不确定时不允许正常输出。
-            软件仲裁负责决策，硬件使能门负责最终放行，MRM 协调器保留独立执行路径。
-          </p>
-        </div>
-
-        <div class="safety-grid">
-          <div class="safety-requirements">
-            <div class="safety-req">
-              <small>SC-01 / PERMISSION</small>
-              <strong>只有 A/B 反馈均有效、指令与车辆响应一致时才允许 NORMAL。</strong>
-              <span>验证：断开一路反馈、注入陈旧帧和卡滞信号，平台均不得保持 NORMAL。</span>
-            </div>
-            <div class="safety-req">
-              <small>SC-02 / INDEPENDENCE</small>
-              <strong>A/B 控制器、供电、通信和时间源不得存在单一失效点。</strong>
-              <span>验证：逐一切断电源/通信，并检查共性机械或软件依赖。</span>
-            </div>
-            <div class="safety-req">
-              <small>SC-03 / CONTINUITY</small>
-              <strong>热备接管必须限扭矩、限转角速率并保持反馈闭环。</strong>
-              <span>验证：记录接管前后的转角、横摆率和横向误差曲线。</span>
-            </div>
-            <div class="safety-req">
-              <small>SC-04 / LATCH</small>
-              <strong>降级和 MRM 状态必须锁存，恢复只能通过维修流程。</strong>
-              <span>验证：清除故障码后不得自动进入 NORMAL；需重新自检与授权。</span>
-            </div>
-            <div class="safety-req">
-              <small>SC-05 / SAFE STOP</small>
-              <strong>无有效转向能力时，MRM 协调器应独立禁止增扭、请求受控减速并准备驻车。</strong>
-              <span>验证：双通道失效故障注入后完成停车，事件顺序可重建。</span>
-            </div>
-          </div>
-
-          <div class="safety-arch">
-            <svg viewBox="0 0 720 650" role="img" aria-labelledby="safety-title safety-desc">
-              <title id="safety-title">左前转向失效场景的安全架构</title>
-              <desc id="safety-desc">双传感器输入进入独立健康监控和一致性判断，模式仲裁决定正常、降级或最小风险机动，硬件使能门控制执行器输出。</desc>
-              <defs>
-                <marker id="safe-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
-                  <path d="M 0 0 L 10 5 L 0 10 z" fill="#0b1415"/>
-                </marker>
-              </defs>
-              <rect width="720" height="650" fill="#f9faf5"/>
-
-              <rect x="36" y="42" width="180" height="82" rx="12" fill="#ffffff" stroke="#b9c0b5"/>
-              <text x="57" y="70" fill="#ff6b3d" font-family="Consolas, monospace" font-size="10">INPUT A</text>
-              <text x="57" y="98" fill="#0b1415" font-family="Microsoft YaHei" font-size="15" font-weight="700">反馈 A</text>
-              <text x="57" y="116" fill="#66706d" font-family="Microsoft YaHei" font-size="9">角度 / 电流 / 温度</text>
-
-              <rect x="36" y="145" width="180" height="82" rx="12" fill="#ffffff" stroke="#b9c0b5"/>
-              <text x="57" y="173" fill="#ff6b3d" font-family="Consolas, monospace" font-size="10">INPUT B</text>
-              <text x="57" y="201" fill="#0b1415" font-family="Microsoft YaHei" font-size="15" font-weight="700">反馈 B</text>
-              <text x="57" y="219" fill="#66706d" font-family="Microsoft YaHei" font-size="9">角度 / 电流 / 温度</text>
-
-              <rect x="36" y="282" width="180" height="74" rx="12" fill="#fff1e9" stroke="#ff6b3d"/>
-              <text x="57" y="309" fill="#ff6b3d" font-family="Consolas, monospace" font-size="10">BACKUP STATE</text>
-              <text x="57" y="337" fill="#0b1415" font-family="Microsoft YaHei" font-size="14" font-weight="700">B 通道可用性</text>
-
-              <rect x="275" y="75" width="190" height="90" rx="12" fill="#ffffff" stroke="#0b1415" stroke-width="1.3"/>
-              <text x="296" y="104" fill="#0b1415" font-family="Microsoft YaHei" font-size="15" font-weight="700">独立健康判断</text>
-              <text x="296" y="128" fill="#66706d" font-family="Microsoft YaHei" font-size="9">新鲜度 · 范围 · 一致性</text>
-              <text x="296" y="145" fill="#66706d" font-family="Microsoft YaHei" font-size="9">“未知”按不安全处理</text>
-
-              <rect x="275" y="222" width="190" height="96" rx="12" fill="#e8eadf" stroke="#0b1415" stroke-width="1.4"/>
-              <text x="296" y="251" fill="#0b1415" font-family="Microsoft YaHei" font-size="15" font-weight="700">2oo2 合理性判断</text>
-              <text x="296" y="275" fill="#66706d" font-family="Microsoft YaHei" font-size="9">指令 vs 实际</text>
-              <text x="296" y="292" fill="#66706d" font-family="Microsoft YaHei" font-size="9">A vs B vs 车辆响应</text>
-
-              <rect x="522" y="78" width="160" height="92" rx="12" fill="#d7ff64" stroke="#0b1415"/>
-              <text x="542" y="108" fill="#0b1415" font-family="Microsoft YaHei" font-size="15" font-weight="700">模式仲裁</text>
-              <text x="542" y="132" fill="#495728" font-family="Microsoft YaHei" font-size="9">NORMAL</text>
-              <text x="542" y="148" fill="#495728" font-family="Microsoft YaHei" font-size="9">DEGRADED / MRM</text>
-
-              <rect x="522" y="222" width="160" height="92" rx="12" fill="#111d20"/>
-              <text x="542" y="252" fill="#d7ff64" font-family="Microsoft YaHei" font-size="15" font-weight="700">硬件使能门</text>
-              <text x="542" y="276" fill="#d8dedd" font-family="Microsoft YaHei" font-size="9">看门狗 · 继电器</text>
-              <text x="542" y="293" fill="#d8dedd" font-family="Microsoft YaHei" font-size="9">输出许可</text>
-
-              <rect x="275" y="395" width="190" height="91" rx="12" fill="#ffffff" stroke="#0b1415"/>
-              <text x="296" y="425" fill="#0b1415" font-family="Microsoft YaHei" font-size="15" font-weight="700">转向通道 A/B</text>
-              <text x="296" y="449" fill="#66706d" font-family="Microsoft YaHei" font-size="9">单一通道有效 → DEGRADED</text>
-              <text x="296" y="466" fill="#66706d" font-family="Microsoft YaHei" font-size="9">无有效通道 → MRM</text>
-
-              <rect x="522" y="360" width="160" height="126" rx="12" fill="#fff1e9" stroke="#ff6b3d"/>
-              <text x="542" y="389" fill="#ff6b3d" font-family="Consolas, monospace" font-size="10">INDEPENDENT</text>
-              <text x="542" y="417" fill="#0b1415" font-family="Microsoft YaHei" font-size="15" font-weight="700">MRM 协调器</text>
-              <text x="542" y="440" fill="#66706d" font-family="Microsoft YaHei" font-size="9">禁止增扭</text>
-              <text x="542" y="457" fill="#66706d" font-family="Microsoft YaHei" font-size="9">受控减速 / 驻车</text>
-              <text x="542" y="474" fill="#66706d" font-family="Microsoft YaHei" font-size="9">远程通知</text>
-
-              <rect x="275" y="535" width="407" height="60" rx="10" fill="#111d20"/>
-              <text x="296" y="561" fill="#d7ff64" font-family="Microsoft YaHei" font-size="14" font-weight="700">锁存状态 + 证据记录</text>
-              <text x="296" y="580" fill="#d8dedd" font-family="Microsoft YaHei" font-size="9">状态迁移、故障码、指令、反馈、时间戳与最终停车结果</text>
-
-              <path d="M216 83 H275" fill="none" stroke="#0b1415" stroke-width="2" marker-end="url(#safe-arrow)"/>
-              <path d="M216 186 H245 V124 H275" fill="none" stroke="#0b1415" stroke-width="2" marker-end="url(#safe-arrow)"/>
-              <path d="M216 319 H245 V270 H275" fill="none" stroke="#0b1415" stroke-width="2" marker-end="url(#safe-arrow)"/>
-              <path d="M465 124 H492 V270 H522" fill="none" stroke="#0b1415" stroke-width="2" marker-end="url(#safe-arrow)"/>
-              <path d="M465 270 H522" fill="none" stroke="#0b1415" stroke-width="2" marker-end="url(#safe-arrow)"/>
-              <path d="M602 170 V222" fill="none" stroke="#0b1415" stroke-width="2" marker-end="url(#safe-arrow)"/>
-              <path d="M602 314 V338 H450 V395" fill="none" stroke="#0b1415" stroke-width="2" marker-end="url(#safe-arrow)"/>
-              <path d="M522 270 H497 V286 H450" fill="none" stroke="#ff6b3d" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#safe-arrow)"/>
-              <path d="M602 314 V360" fill="none" stroke="#ff6b3d" stroke-width="1.8" marker-end="url(#safe-arrow)"/>
-              <path d="M465 486 V535" fill="none" stroke="#0b1415" stroke-width="1.8" marker-end="url(#safe-arrow)"/>
-              <path d="M602 486 V535" fill="none" stroke="#0b1415" stroke-width="1.8" marker-end="url(#safe-arrow)"/>
-              <path d="M465 426 H502 V449 H522" fill="none" stroke="#ff6b3d" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#safe-arrow)"/>
-            </svg>
-          </div>
-        </div>
-
-        <h3 class="subhead">安全约束—安全需求映射</h3>
-        <table class="trace-table">
-          <thead>
-            <tr>
-              <th>STPA 安全约束</th>
-              <th>安全需求</th>
-              <th>映射说明</th>
-            </tr>
-          </thead>
+    <section class="doc-section">
+      <h2>3. 系统需求规格</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>编号</th><th>需求陈述</th><th>初始验收方向</th><th>追溯</th></tr></thead>
           <tbody>
-            <tr>
-              <td>SC-01</td>
-              <td>SAF-01</td>
-              <td>健康状态未知时禁止 NORMAL，落实“未知即不安全”。</td>
-            </tr>
-            <tr>
-              <td>SC-02</td>
-              <td>SAF-03</td>
-              <td>A/B 独立性和共性故障检测落实到供电、通信、计算与时间源。</td>
-            </tr>
-            <tr>
-              <td>SC-03</td>
-              <td>SAF-06</td>
-              <td>切换过程的扭矩限制、速率限制和反馈闭环形成独立安全需求。</td>
-            </tr>
-            <tr>
-              <td>SC-04</td>
-              <td>SAF-02</td>
-              <td>降级与 MRM 状态锁存，恢复必须经过维修确认和重新自检。</td>
-            </tr>
-            <tr>
-              <td>SC-05</td>
-              <td>SAF-04</td>
-              <td>无有效转向能力时进入 MRM，同时禁止驱动增扭。</td>
-            </tr>
-            <tr>
-              <td>跨场景约束</td>
-              <td>SAF-05</td>
-              <td>所有状态迁移由软件仲裁和硬件使能门共同放行。</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <h3 class="subhead">危险—不安全控制动作—约束追溯</h3>
-        <table class="trace-table">
-          <thead>
-            <tr>
-              <th>危险</th>
-              <th>不安全控制动作</th>
-              <th>安全约束</th>
-              <th>架构分配</th>
-              <th>验证证据</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>H-01</td>
-              <td>UCA-01</td>
-              <td>SC-01</td>
-              <td>双反馈 + 独立健康判断 + 2oo2 合理性判断</td>
-              <td>陈旧/卡滞/矛盾反馈注入；NORMAL 不得保持</td>
-            </tr>
-            <tr>
-              <td>H-01</td>
-              <td>UCA-02</td>
-              <td>SC-02</td>
-              <td>A/B 独立供电、通信、时间源与硬件使能</td>
-              <td>逐路断电、断通信与共性故障分析</td>
-            </tr>
-            <tr>
-              <td>H-02</td>
-              <td>UCA-03</td>
-              <td>SC-03</td>
-              <td>热备接管控制、抗饱和、速率限制与扭矩渐入</td>
-              <td>接管曲线、横向误差与横摆率记录</td>
-            </tr>
-            <tr>
-              <td>H-02</td>
-              <td>UCA-04</td>
-              <td>SC-04</td>
-              <td>锁存模式 + 独立 MRM 协调器 + 制动/驱动限制</td>
-              <td>双通道失效注入；停车状态与事件顺序可重建</td>
-            </tr>
-            <tr>
-              <td>H-01</td>
-              <td>UCA-05</td>
-              <td>SC-05</td>
-              <td>独立 MRM 协调器 + 制动/驱动限制</td>
-              <td>VT-03 记录 MRM 请求时刻、减速度和最终驻车状态</td>
-            </tr>
+            <tr><td>FR-01</td><td>同时监测两个转向通道的指令、实际角度、电流、使能状态和通信新鲜度，并区分有效、降级、未知和故障。</td><td>两类以上独立证据不一致时不得保持有效。</td><td>SR-09</td></tr>
+            <tr><td>FR-02</td><td>主通道失效时锁存故障、阻断错误指令，并切换到已通过自检的热备通道。</td><td>故障后不自动返回 NORMAL。</td><td>SC-01/02</td></tr>
+            <tr><td>FR-03</td><td>切换过程中保持转角目标和横摆趋势连续，不产生阶跃式转向修正。</td><td>控制周期 10 ms，切换不得触发驱动增扭。</td><td>SC-03</td></tr>
+            <tr><td>FR-04</td><td>仅有一个有效转向通道时进入 DEGRADED，限制车速并声明可实现转向能力。</td><td>建议速度上限 20 km/h，按整车标定。</td><td>SR-09</td></tr>
+            <tr><td>FR-05</td><td>没有有效转向通道时拒绝新任务、进入 MRM，并协调制动、驱动和驻车。</td><td>建议 100 ms 内发出 MRM，减速度不超过 0.3 g。</td><td>SR-10</td></tr>
+            <tr><td>PR-01</td><td>固定周期完成健康判断、模式仲裁和转向指令更新。</td><td>周期 10 ms，抖动目标小于 1 ms。</td><td>时序基线</td></tr>
+            <tr><td>PR-02</td><td>从注入单通道故障到发布降级状态的时间受控。</td><td>建议检测时间不超过 50 ms。</td><td>SC-01</td></tr>
+            <tr><td>PR-03</td><td>热备通道在规定时序内接管并保持指令连续。</td><td>建议接管完成时间不超过 100 ms。</td><td>SC-03</td></tr>
+            <tr><td>DR-01</td><td>记录故障码、模式迁移前后状态、双通道反馈、指令序列和统一时间戳。</td><td>一次测试可由事件序列独立重建。</td><td>BR-07</td></tr>
           </tbody>
         </table>
       </div>
     </section>
 
-    <section class="section acid" id="verification">
-      <div class="wrap">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">07 / Verification</div>
-            <h2>用故障注入证明，<span>而不是只写“应该安全”。</span></h2>
-          </div>
-          <p class="section-lead">
-            先在 HIL 台架注入可重复的单点故障，再进入封闭场地验证车辆运动。
-            每个用例必须同时检查模式迁移、时序、车辆轨迹和证据记录。
-          </p>
-        </div>
-
-        <h3 class="subhead">需求—架构—验证分配矩阵</h3>
-        <div class="req-table-wrap">
-          <table class="req-table">
-            <thead>
-              <tr>
-                <th>需求</th>
-                <th>架构组件</th>
-                <th>验证用例</th>
-                <th>通过证据</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="req-id">FR-01</td>
-                <td>接口网关、独立健康判断、2oo2 合理性判断</td>
-                <td>VT-02、VT-04</td>
-                <td>反馈新鲜度、发散检测和 NORMAL 禁止记录</td>
-              </tr>
-              <tr>
-                <td class="req-id">FR-02</td>
-                <td>模式仲裁、转向控制器 A/B、硬件使能门</td>
-                <td>VT-01</td>
-                <td>主通道切除、B 通道接管及状态锁存曲线</td>
-              </tr>
-              <tr>
-                <td class="req-id">FR-03</td>
-                <td>转向控制器 B、运动监督、事件记录</td>
-                <td>VT-01</td>
-                <td>接管前后转角、横摆率和横向误差曲线</td>
-              </tr>
-              <tr>
-                <td class="req-id">FR-04</td>
-                <td>模式仲裁、驱动扭矩限制、状态接口</td>
-                <td>VT-01</td>
-                <td>DEGRADED 状态、速度上限和禁止增扭记录</td>
-              </tr>
-              <tr>
-                <td class="req-id">FR-05</td>
-                <td>MRM 协调器、制动/驱动接口、驻车控制</td>
-                <td>VT-03</td>
-                <td>MRM 请求时刻、减速度、驻车和远程通知记录</td>
-              </tr>
-              <tr>
-                <td class="req-id">PR-01</td>
-                <td>时间同步、健康判断、模式仲裁</td>
-                <td>VT-01、VT-04</td>
-                <td>控制周期、时间戳单调性和抖动统计</td>
-              </tr>
-              <tr>
-                <td class="req-id">PR-02</td>
-                <td>独立健康判断</td>
-                <td>VT-01、VT-02</td>
-                <td>故障注入至降级状态的端到端时延</td>
-              </tr>
-              <tr>
-                <td class="req-id">PR-03</td>
-                <td>热备转向控制器 B、模式仲裁</td>
-                <td>VT-01</td>
-                <td>执行权切换时序与指令连续性</td>
-              </tr>
-              <tr>
-                <td class="req-id">DR-01</td>
-                <td>事件记录与证据链</td>
-                <td>VT-01～VT-04</td>
-                <td>故障码、状态迁移、双通道反馈和统一时间戳</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="validation-grid">
-          <article class="test-card">
-            <small>VT-01 / OPEN CIRCUIT</small>
-            <h3>主通道开路</h3>
-            <p>在 15 km/h 定曲率左转中切断 A 通道执行器使能，B 通道保持热备。</p>
-            <strong>通过：≤50 ms 检出，≤100 ms 接管；不进入 NORMAL，不出现驱动扭矩上升。</strong>
-          </article>
-          <article class="test-card">
-            <small>VT-02 / STALE / STUCK</small>
-            <h3>反馈卡滞或陈旧</h3>
-            <p>保持最后角度值但停止更新时间戳，并制造 A/B 指令与实际角度不一致。</p>
-            <strong>通过：平台识别为“未知”，禁止 NORMAL，记录完整故障快照。</strong>
-          </article>
-          <article class="test-card">
-            <small>VT-03 / B UNAVAILABLE</small>
-            <h3>备份不可用</h3>
-            <p>注入 A 通道失效，同时使 B 通道自检失败或供电中断。</p>
-            <strong>通过：100 ms 内请求 MRM；驱动增扭被禁止；车辆进入受控减速并驻车。</strong>
-          </article>
-          <article class="test-card">
-            <small>VT-04 / COMMON CAUSE</small>
-            <h3>共因与恢复</h3>
-            <p>断开共享通信/时钟并验证独立路径；随后清除故障码但未维修。</p>
-            <strong>通过：共性故障可检测；故障锁存不得自动解除；维修确认后才允许重新自检。</strong>
-          </article>
-        </div>
-
-        <div class="qa-grid" style="margin-top:34px">
-          <article class="qa-card">
-            <small>CHECK / 01</small>
-            <h3>范围约束</h3>
-            <p>研究对象限定为一个明确故障、一个驾驶阶段和一套可测量结果；全部需求均追溯至该场景。</p>
-          </article>
-          <article class="qa-card">
-            <small>CHECK / 02</small>
-            <h3>双通道基线</h3>
-            <p>双通道设计使单点失效能够被检测、隔离和接管；无法接管时，由 MRM 将车辆带入可预测的安全状态。</p>
-          </article>
-          <article class="qa-card">
-            <small>CHECK / 03</small>
-            <h3>阈值状态</h3>
-            <p>50 ms、100 ms、20 km/h 与 0.3 g 属于待确认的验证基线，须结合车型、轮胎、载荷、道路和安全目标标定。</p>
-          </article>
-        </div>
-
-        <div class="handoff">
-          <div class="deliverables">
-            <h3>交付内容</h3>
-            <ul>
-              <li>系统需求规格书（单故障场景裁剪版）</li>
-              <li>系统控制结构框图</li>
-              <li>初始系统架构与状态迁移</li>
-              <li>STPA 危险、UCA、因果场景与安全约束</li>
-              <li>安全架构与验证追溯表</li>
-            </ul>
-          </div>
-          <div class="limits">
-            <h3>明确的下一步</h3>
-            <ul>
-              <li>与整车团队确认 15 km/h、15 m 转弯半径、半载和干沥青是否能作为统一验证基线。</li>
-              <li>用 HIL 原型验证 50 ms 检测与 100 ms 接管目标是否可达。</li>
-              <li>把 A/B 独立性从“架构声明”落实到电源、通信、时钟和机械共因分析。</li>
-              <li>只有测试结果通过后，才决定是否提高降级速度上限或缩短停车距离。</li>
-            </ul>
-          </div>
-        </div>
+    <section class="doc-section">
+      <h2>4. STPA 分析</h2>
+      <p>STPA 重点检查控制器过程模型是否错误、反馈是否新鲜，以及切换动作是否可能引入新的运动风险。</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>危险</th><th>不安全控制动作</th><th>因果场景</th><th>安全约束</th><th>架构响应</th></tr></thead>
+          <tbody>
+            <tr><td>H-01 无法维持预期横向路径</td><td>UCA-01 健康未知时仍发布 NORMAL 和正常速度</td><td>通信在线被误认为执行器可用；反馈陈旧</td><td>SC-01 未知不授权 NORMAL</td><td>双反馈、新鲜度校验和 2oo2 合理性判断</td></tr>
+            <tr><td>H-01 无法维持预期横向路径</td><td>UCA-02 备份未完成自检时提前授予执行权</td><td>方向或零位错误，切换成为新风险</td><td>SC-02 接管前完成自检与授权</td><td>硬件使能门和锁存式仲裁</td></tr>
+            <tr><td>H-02 切换产生非预期转向或横摆</td><td>UCA-03 接管时未先限制扭矩就输出大转角</td><td>力矩冲突、积分饱和</td><td>SC-03 限扭矩、限变化率、保持闭环</td><td>抗饱和、速率限制和扭矩渐入</td></tr>
+            <tr><td>H-01 车辆失去方向控制</td><td>UCA-04 无有效转向时继续驱动</td><td>可用停车距离和路径裕度持续缩小</td><td>SC-04 禁止增扭并进入 MRM</td><td>独立 MRM 协调器和驱动限制</td></tr>
+            <tr><td>H-02 收敛过程不可预测</td><td>UCA-05 确认无转向能力后延迟请求 MRM</td><td>等待更优决策导致过度延迟</td><td>SC-05 及时禁止增扭并安全停车</td><td>固定超时、事件记录和驻车准备</td></tr>
+          </tbody>
+        </table>
       </div>
     </section>
+
+    <section class="doc-section">
+      <h2>5. 安全需求与验证</h2>
+      <div class="two-col">
+        <div class="box">
+          <h3>安全需求</h3>
+          <p>SAF-01 未知状态不得声明 NORMAL；SAF-02 故障必须锁存；SAF-03 双通道不得共享单一电源、通信路径或时间源；SAF-04 无有效转向时禁止增扭并进入 MRM；SAF-05 模式迁移需软硬件共同放行；SAF-06 接管期间限制扭矩和转角变化率。</p>
+        </div>
+        <div class="box">
+          <h3>故障注入</h3>
+          <p>VT-01 主通道开路；VT-02 反馈陈旧或卡滞；VT-03 备份不可用；VT-04 共因故障与恢复。测试同时检查模式迁移、时序、车辆轨迹和证据记录。</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>用例</th><th>注入条件</th><th>通过证据</th></tr></thead>
+          <tbody>
+            <tr><td>VT-01</td><td>15 km/h 定曲率左转中切断 A 通道使能，B 通道热备。</td><td>检测与接管满足基线；不返回 NORMAL；无驱动扭矩上升。</td></tr>
+            <tr><td>VT-02</td><td>保持旧转角值但停止更新时间戳，并制造指令与实际角度不一致。</td><td>平台判为未知；禁止 NORMAL；完整保存故障快照。</td></tr>
+            <tr><td>VT-03</td><td>A 通道失效同时使 B 通道自检失败或供电中断。</td><td>及时请求 MRM；禁止增扭；完成受控减速与驻车。</td></tr>
+            <tr><td>VT-04</td><td>断开共享通信或时钟；清除故障码但不维修。</td><td>共性故障可检测；状态锁存；维修确认后才允许重新自检。</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <nav class="doc-nav" aria-label="作业导航">
+      <a href="../../">← 返回四次作业</a>
+    </nav>
   </main>
-
-  <button class="back-top" id="back-top" type="button" aria-label="返回顶部">↑</button>
-
-  <footer class="footer">
-    <div>
-      <strong>Complex Systems Engineering / Assignment 03</strong><br>
-      左前转向执行器失效 · SyRS · Initial Architecture · STPA · 2026
-    </div>
-    <div>
-      <a href="../../">课程作业入口</a> ·
-      <a href="../concept-definition/">作业 02</a> ·
-      <a href="../wire-control-chassis/">作业 01</a>
-    </div>
-  </footer>
-
-  <script>
-    const backTop = document.getElementById("back-top");
-    let scrollQueued = false;
-
-    if (window.location.hash) {
-      requestAnimationFrame(() => {
-        const deepLinkTarget = document.querySelector(window.location.hash);
-        deepLinkTarget?.scrollIntoView();
-      });
-    }
-
-    window.addEventListener("scroll", () => {
-      if (!scrollQueued) {
-        scrollQueued = true;
-        requestAnimationFrame(() => {
-          backTop.classList.toggle("show", window.scrollY > 700);
-          scrollQueued = false;
-        });
-      }
-    }, { passive: true });
-
-    backTop.addEventListener("click", () => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-  </script>
 </body>
 </html>
