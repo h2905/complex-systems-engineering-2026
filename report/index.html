@@ -1,696 +1,833 @@
-<!doctype html>
+<!DOCTYPE doctype html>
+
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="复杂系统工程课程完整汇报：面向高级别自动驾驶的线控底盘平台">
-  <title>完整汇报｜线控底盘平台</title>
-  <link rel="stylesheet" href="../assets/report.css">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="复杂系统工程课程完整汇报：面向高级别自动驾驶的线控底盘平台" name="description"/>
+<title>完整汇报｜线控底盘平台</title>
+<link href="../assets/report.css" rel="stylesheet"/>
 </head>
 <body>
-  <div class="deck-shell">
-    <main class="deck-stage" aria-label="小组汇报">
-      <section class="slide cover active" data-page="01">
-        <div class="cover-rule"></div>
-        <h1>面向高级别自动驾驶的<span>线控底盘平台</span></h1>
-        <p class="cover-subtitle">
+<div class="deck-shell">
+<main aria-label="小组汇报" class="deck-stage">
+<section class="slide cover active" data-page="01">
+<div class="cover-rule"></div>
+<h1>面向高级别自动驾驶的<span>线控底盘平台</span></h1>
+<p class="cover-subtitle">
           从系统层级、业务与相关方需求、系统安全架构，到运行场景分层与风险分析
         </p>
-        <div class="cover-meta">
-          <div><small>COURSE</small><strong>Complex Systems Engineering</strong></div>
-          <div><small>SYSTEM</small><strong>X-by-wire Chassis Platform</strong></div>
-          <div><small>ASSIGNMENTS</small><strong>01 — 04</strong></div>
-          <div><small>DATE</small><strong>2026.11</strong></div>
-        </div>
-      </section>
-
-      <section class="slide" data-page="02">
-        <header class="slide-head">
-          <div><span class="label">REPORT STRUCTURE</span><h2>汇报结构</h2></div>
-          <p>四次作业沿同一系统主线展开。前三部分建立需求和架构，第四部分把系统放回具体运行环境。</p>
-        </header>
-        <div class="slide-body">
-          <div class="contents-grid">
-            <article>
-              <b>01</b>
-              <h3>系统层级与边界</h3>
-              <p>说明研究对象处在哪一层，以及任务、体系、整车和执行模块如何形成需求链。</p>
-              <small>层级 / 边界 / 接口</small>
-            </article>
-            <article>
-              <b>02</b>
-              <h3>业务与相关方需求</h3>
-              <p>回答为什么要建设平台，以及乘客、运营、监管、开发和维护人员分别需要什么。</p>
-              <small>ConOps / BRS / StRS</small>
-            </article>
-            <article>
-              <b>03</b>
-              <h3>系统需求与安全架构</h3>
-              <p>以单通道失效为切片，形成可验证的 SyRS、控制结构、初始架构和 STPA 约束。</p>
-              <small>SyRS / STPA / 验证</small>
-            </article>
-            <article>
-              <b>04</b>
-              <h3>运行场景与风险</h3>
-              <p>分层梳理运行环境、正常设计条件、典型左转实例和风险场景列表。</p>
-              <small>场景 / ODD / 风险</small>
-            </article>
-          </div>
-          <div class="key-message">主线：运营任务 → 业务与相关方需求 → 系统需求与安全架构 → 具体运行场景中的验证与风险控制。</div>
-        </div>
-        <footer class="slide-foot"><span>H2905 · 线控底盘平台</span><span>完整汇报</span></footer>
-      </section>
-
-      <section class="slide" data-page="03">
-        <header class="slide-head">
-          <div><span class="label">SYSTEM BOUNDARY</span><h2>系统对象与边界</h2></div>
-          <p>平台位于 Systems 层，向上接收运动意图，向下协调转向、制动、驱动与悬架。</p>
-        </header>
-        <div class="slide-body">
-          <div class="arrow-row">
-            <div class="node"><strong>AD 域</strong><span>轨迹 / 速度 / 停车</span></div><div class="arrow">→</div>
-            <div class="node"><strong>线控底盘平台</strong><span>解释 / 协同 / 仲裁</span></div><div class="arrow">→</div>
-            <div class="node"><strong>四类执行子系统</strong><span>转向 / 制动 / 驱动 / 悬架</span></div><div class="arrow">→</div>
-            <div class="node"><strong>整车运动</strong><span>路径 / 速度 / 姿态</span></div>
-          </div>
-          <div class="three-col" style="height:auto">
-            <div class="plain-box"><h3>范围内</h3><p>运动意图解释、多执行器协同、冗余仲裁、状态估计、故障降级、统一接口与事件记录。</p></div>
-            <div class="plain-box"><h3>范围外</h3><p>感知算法、全局路径规划、云端调度，以及单电机、制动卡钳等执行器机械本体设计。</p></div>
-            <div class="plain-box"><h3>边界原则</h3><p>上层给出任务意图，平台必须说明当前能力；能力未知或不足时，不得默认继续正常执行。</p></div>
-          </div>
-          <div class="key-message">平台的核心输出不是“某个执行器已在线”，而是“当前仍可完成什么运动，以及还能持续多久”。</div>
-        </div>
-        <footer class="slide-foot"><span>系统层级 / 系统边界</span><span>03</span></footer>
-      </section>
-
-      <section class="slide" data-page="04">
-        <header class="slide-head">
-          <div><span class="label">SIX LEVELS</span><h2>六层系统分析</h2></div>
-          <p>每一层都需要说明对象、输入、输出和与线控底盘平台的连接关系。</p>
-        </header>
-        <div class="slide-body">
-          <div class="system-map">
-            <div><small>L1 / MISSION</small><h3>任务</h3><p>安全、连续地完成高级别自动驾驶出行或接驳。</p></div>
-            <div><small>L2 / SoS</small><h3>体系</h3><p>车队、云控、路侧、补能、救援与监管共同提供运营条件。</p></div>
-            <div><small>L3 / VEHICLE</small><h3>整车</h3><p>以轨迹、速度、加速度和停车位置承载任务。</p></div>
-            <div><small>L4 / SYSTEM</small><h3>线控底盘平台</h3><p>把运动意图分配为四类执行能力，并持续声明剩余能力。</p></div>
-            <div><small>L5 / SUBSYSTEM</small><h3>子系统</h3><p>转向、制动、驱动和悬架分别形成横向、纵向和垂向能力。</p></div>
-            <div><small>L6 / MODULE</small><h3>模块</h3><p>电机、控制器、传感器、电源和通信提供可观测的物理执行。</p></div>
-          </div>
-          <div class="state-strip">
-            <div><small>分析对象</small><strong>Systems</strong><p>跨子系统集成平台</p></div>
-            <div><small>向上关系</small><strong>承接意图</strong><p>整车运动与安全约束</p></div>
-            <div><small>向下关系</small><strong>组织执行</strong><p>四类底盘子系统</p></div>
-            <div><small>核心边界</small><strong>能力声明</strong><p>可用、受限、MRM、隔离</p></div>
-          </div>
-        </div>
-        <footer class="slide-foot"><span>系统层级 / 六层分析</span><span>04</span></footer>
-      </section>
-
-      <section class="slide" data-page="05">
-        <header class="slide-head">
-          <div><span class="label">TRACEABILITY</span><h2>一个左转任务如何向下传递</h2></div>
-          <p>用同一场景检查六层之间的接口和责任，避免每层各写一套互不对应的需求。</p>
-        </header>
-        <div class="slide-body">
-          <div class="timeline">
-            <article><time>任务</time><h3>完成无人接驳</h3><p>安全到达站点，不依赖车内驾驶员。</p></article>
-            <article><time>体系</time><h3>批准 ODD 与任务</h3><p>调度下发站点、路段、天气边界和救援条件。</p></article>
-            <article><time>整车</time><h3>规划左转轨迹</h3><p>选择 12–15 km/h、曲率和安全停车位置。</p></article>
-            <article><time>系统</time><h3>分解运动指令</h3><p>生成转角、制动、轮端扭矩和姿态目标。</p></article>
-            <article><time>子系统</time><h3>执行器协同</h3><p>跟踪角度、控制速度、抑制侧倾。</p></article>
-            <article><time>模块</time><h3>状态反馈</h3><p>回传角度、电流、温度、轮速和健康状态。</p></article>
-          </div>
-          <div class="two-col col-55-45" style="margin-top:28px;height:auto">
-            <div class="plain-box">
-              <h3>设计含义</h3>
-              <p>任务层改变会向下传递约束；模块级能力不足也必须向上形成能力声明。缺少任何一层，需求链都会在集成或验证阶段断开。</p>
-            </div>
-            <div class="plain-box">
-              <h3>课程示例参数</h3>
-              <p>左转车轮转角约 +32.5°、目标车速约 12 km/h、整体状态 NORMAL。该组参数仅用于解释传递关系，不作为量产结论。</p>
-            </div>
-          </div>
-        </div>
-        <footer class="slide-foot"><span>系统层级 / 场景传递</span><span>05</span></footer>
-      </section>
-
-      <section class="slide" data-page="06">
-        <header class="slide-head">
-          <div><span class="label">CONOPS / OPSCON</span><h2>运营概念与系统运行概念</h2></div>
-          <p>ConOps 描述业务怎样运转，OpsCon 说明线控底盘平台在其中承担什么。</p>
-        </header>
-        <div class="slide-body">
-          <div class="two-col">
-            <div class="plain-box">
-              <h3>ConOps：城市 L4 出行服务</h3>
-              <ul>
-                <li>运营公司组织车辆、云控、路侧、补能、维护与救援资源。</li>
-                <li>车辆在批准的 ODD、车辆状态和任务边界内提供载客服务。</li>
-                <li>每次行程、故障和维护数据回到运营决策与安全证据。</li>
-              </ul>
-            </div>
-            <div class="plain-box">
-              <h3>OpsCon：线控底盘平台</h3>
-              <ul>
-                <li>输入：轨迹、速度、加速度、安全停车请求和整车状态。</li>
-                <li>处理：意图解释、执行分配、协同、仲裁、降级和状态估计。</li>
-                <li>输出：转角、制动力、轮端扭矩、姿态指令及剩余能力。</li>
-              </ul>
-            </div>
-          </div>
-          <div class="state-strip">
-            <div><small>NORMAL</small><strong>全通道能力</strong><p>执行常规任务</p></div>
-            <div><small>DEGRADED</small><strong>受限但可控</strong><p>降低速度或任务范围</p></div>
-            <div><small>MRM</small><strong>最小风险机动</strong><p>禁止新任务并安全停车</p></div>
-            <div><small>SAFE_STOP</small><strong>驻车与隔离</strong><p>等待维修或救援</p></div>
-          </div>
-          <div class="key-message">公共网络可以辅助运营，但本地运动控制、故障仲裁和 MRM 不能依赖云控链路。</div>
-        </div>
-        <footer class="slide-foot"><span>需求定义 / 运营概念</span><span>06</span></footer>
-      </section>
-
-      <section class="slide" data-page="07">
-        <header class="slide-head">
-          <div><span class="label">STAKEHOLDERS</span><h2>相关方需要并不总和</h2></div>
-          <p>需求定义不仅收集愿望，也要把安全、效率、成本和合规之间的冲突显式写出来。</p>
-        </header>
-        <div class="slide-body">
-          <div class="requirements-table">
-            <table>
-              <thead><tr><th style="width:15%">相关方</th><th style="width:27%">主要需要</th><th style="width:26%">可能冲突</th><th>处理方向</th></tr></thead>
-              <tbody>
-                <tr><td>乘客</td><td>安全、平顺、状态可理解。</td><td>紧急制动与乘员舒适性。</td><td>区分正常、紧急和 MRM 减速度包线。</td></tr>
-                <tr><td>运营方</td><td>连续服务、成本可控。</td><td>安全裕度与车辆可用率。</td><td>风险分级、恢复流程和能力化调度。</td></tr>
-                <tr><td>云控与远程人员</td><td>掌握真实能力与事件。</td><td>远程效率与本地安全授权。</td><td>本地安全逻辑优先，远程不得绕过锁存。</td></tr>
-                <tr><td>开发与安全团队</td><td>稳定接口和完整证据。</td><td>迭代速度与验证充分性。</td><td>版本化接口、变更影响分析和回归。</td></tr>
-                <tr><td>监管与保险方</td><td>记录完整、责任可追溯。</td><td>证据范围与数据隐私。</td><td>最小必要采集、分级保存和授权访问。</td></tr>
-                <tr><td>维修与供应商</td><td>可隔离、可诊断、责任清晰。</td><td>平台统一性与专有方案。</td><td>接口控制文档、维护模式和隔离点。</td></tr>
-                <tr><td>其他道路参与者</td><td>车辆行为可预测。</td><td>运营效率与轨迹激进度。</td><td>降级和 MRM 不超出可控车辆边界。</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <footer class="slide-foot"><span>需求定义 / 相关方</span><span>07</span></footer>
-      </section>
-
-      <section class="slide" data-page="08">
-        <header class="slide-head">
-          <div><span class="label">BRS / STRS</span><h2>从业务目标到相关方需求</h2></div>
-          <p>BRS 采用 BR-01 至 BR-10；StRS 采用 SR-01 至 SR-22。本次汇报只展示与后续安全场景直接相关的需求。</p>
-        </header>
-        <div class="slide-body">
-          <div class="requirements-table">
-            <table>
-              <thead><tr><th style="width:9%">编号</th><th>需求摘要</th><th style="width:28%">通过准则</th></tr></thead>
-              <tbody>
-                <tr><td>BR-01</td><td>在定义 ODD 内完成无人化接驳，不依赖车内驾驶员完成常规行程。</td><td>批准 ODD 内完成无人运行验证与运营审核。</td></tr>
-                <tr><td>BR-02</td><td>避免底盘运动执行单点失效导致不可控运动。</td><td>安全分析、故障注入与台架或实车证据闭环。</td></tr>
-                <tr><td>BR-04</td><td>乘客获得可解释、与安全约束一致的运动体验。</td><td>加速度、冲击与姿态满足舒适基线。</td></tr>
-                <tr><td>BR-07</td><td>任务、故障、降级、维护与验证数据形成证据链。</td><td>安全要求可追溯至场景、实现和测试。</td></tr>
-                <tr><td>SR-02</td><td>持续发布可用、受限、MRM、隔离状态。</td><td>整车与云控一致解析，状态迁移正确。</td></tr>
-                <tr><td>SR-08</td><td>把轨迹和停车意图转换为相互约束的执行指令。</td><td>场景验证无持续执行器冲突。</td></tr>
-                <tr><td>SR-09</td><td>关键执行通道单点故障时检测、隔离并保持最低能力。</td><td>满足降级包线或进入 MRM。</td></tr>
-                <tr><td>SR-10</td><td>无法维持最低能力时进入并保持 MRM。</td><td>MRM 可重复进入，驻车状态可确认。</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <footer class="slide-foot"><span>需求定义 / 需求基线</span><span>08</span></footer>
-      </section>
-
-      <section class="slide" data-page="09">
-        <header class="slide-head">
-          <div><span class="label">REQUIREMENT HANDOFF</span><h2>第二次作业留下的需求接口</h2></div>
-          <p>进入系统需求阶段前，需要把业务目标、相关方需要和验证证据接起来。</p>
-        </header>
-        <div class="slide-body">
-          <div class="arrow-row">
-            <div class="node"><strong>业务目标</strong><span>BR-02 / BR-07</span></div><div class="arrow">→</div>
-            <div class="node"><strong>相关方需求</strong><span>SR-09 / SR-10</span></div><div class="arrow">→</div>
-            <div class="node"><strong>系统场景</strong><span>左前通道失效</span></div><div class="arrow">→</div>
-            <div class="node"><strong>验证证据</strong><span>FR / PR / DR</span></div>
-          </div>
-          <div class="three-col" style="height:auto">
-            <div class="plain-box"><h3>已确认</h3><p>平台必须支持无人运营；关键执行单点故障不得导致不可控运动；状态和证据必须可追溯。</p></div>
-            <div class="plain-box"><h3>待协商</h3><p>具体速度阈值、允许的降级能力、故障恢复时长、日志保存期限和远程人员车辆比。</p></div>
-            <div class="plain-box"><h3>进入安全设计</h3><p>选择“15 km/h 路口左转、左前转向通道失效”作为可注入、可观察、可验证的系统切片。</p></div>
-          </div>
-        </div>
-        <footer class="slide-foot"><span>需求定义 / 场景衔接</span><span>09</span></footer>
-      </section>
-
-      <section class="slide" data-page="10">
-        <header class="slide-head">
-          <div><span class="label">VALIDATION SLICE</span><h2>先限定一个可以验收的切片</h2></div>
-          <p>系统边界只覆盖平台对左前转向通道故障的检测、仲裁、接管、能力声明和 MRM。</p>
-        </header>
-        <div class="slide-body">
-          <div class="three-col">
-            <div class="plain-box"><span class="label">SYSTEM UNDER STUDY</span><h3>线控底盘平台</h3><p>接收 AD 轨迹与速度意图，协调双转向通道、制动和驱动，并实时声明剩余能力。</p></div>
-            <div class="plain-box"><span class="label">FAULT TRIGGER</span><h3>左前转向通道失能</h3><p>执行器开路、反馈失效，或指令与实际角度持续不一致。机械本体设计不属于本切片。</p></div>
-            <div class="plain-box"><span class="label">ACCEPTANCE RESULT</span><h3>降级可控或安全停车</h3><p>不能悄悄回到 NORMAL；最终状态应为 DEGRADED、MRM 或 SAFE_STOP。</p></div>
-          </div>
-          <div class="condition-table" style="margin-top:24px">
-            <table>
-              <thead><tr><th>初始条件</th><th>课程验证基线</th><th>说明</th></tr></thead>
-              <tbody>
-                <tr><td>道路</td><td>干沥青，左转半径约 15 m</td><td>后续需按整车动力学和试验道路确认。</td></tr>
-                <tr><td>车辆</td><td>半载，车速 15 km/h</td><td>用于建立单故障切片的初始参数。</td></tr>
-                <tr><td>时间目标</td><td>检测约 50 ms，接管约 100 ms</td><td>作为待验证指标，不构成量产承诺。</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <footer class="slide-foot"><span>系统需求 / 验证切片</span><span>10</span></footer>
-      </section>
-
-      <section class="slide" data-page="11">
-        <header class="slide-head">
-          <div><span class="label">CONTROL STRUCTURE</span><h2>控制结构与状态迁移</h2></div>
-          <p>AD 域负责运动意图；平台负责可实现性、仲裁和降级；执行器与车辆状态回到平台形成闭环。</p>
-        </header>
-        <div class="slide-body">
-          <div class="system-map" style="grid-template-columns:repeat(5,1fr)">
-            <div><small>COMMAND</small><h3>AD 运动请求</h3><p>曲率、目标速度、加速度上限、安全停车请求。</p></div>
-            <div><small>HEALTH</small><h3>独立健康判断</h3><p>指令、角度、电流、温度和通信新鲜度。</p></div>
-            <div><small>AUTHORITY</small><h3>锁存式仲裁</h3><p>决定模式，阻止未知状态回到 NORMAL。</p></div>
-            <div><small>EXECUTION</small><h3>双通道转向</h3><p>A 主执行，B 热备；制动和驱动受同一模式约束。</p></div>
-            <div><small>FEEDBACK</small><h3>车辆状态</h3><p>转角、横摆、轮速、剩余能力和事件序号。</p></div>
-          </div>
-          <div class="state-strip">
-            <div><small>S0 · NORMAL</small><strong>双通道有效</strong><p>正常转向与速度请求</p></div>
-            <div><small>S1 · DEGRADED</small><strong>单通道有效</strong><p>B 接管，限速并声明能力</p></div>
-            <div><small>S2 · MRM</small><strong>无有效转向</strong><p>禁止新任务、协调受控停车</p></div>
-            <div><small>S3 · SAFE_STOP</small><strong>驻车与隔离</strong><p>事件记录、通知、等待维修</p></div>
-          </div>
-          <div class="key-message">关键反馈不能只写“是否在线”，还要给出模式、剩余转角、速度上限、原因和有效时间。</div>
-        </div>
-        <footer class="slide-foot"><span>系统需求 / 控制结构</span><span>11</span></footer>
-      </section>
-
-      <section class="slide" data-page="12">
-        <header class="slide-head">
-          <div><span class="label">SYSTEM REQUIREMENTS</span><h2>系统需求规格：只写可实现、可验证的内容</h2></div>
-          <p>SyRS 以 FR、PR、DR 编号，并直接追溯到相关方需求和 STPA 安全约束。</p>
-        </header>
-        <div class="slide-body">
-          <div class="requirements-table">
-            <table>
-              <thead><tr><th style="width:9%">编号</th><th>需求陈述</th><th style="width:33%">初始验收方向</th></tr></thead>
-              <tbody>
-                <tr><td>FR-01</td><td>同时监测双通道指令、实际角度、电流、使能和通信新鲜度，区分有效、降级、未知和故障。</td><td>两类以上独立证据不一致时不得保持有效。</td></tr>
-                <tr><td>FR-02</td><td>主通道失效时锁存故障、阻断错误指令，并切换至已通过自检的热备通道。</td><td>故障后不自动返回 NORMAL。</td></tr>
-                <tr><td>FR-03</td><td>切换时保持转角和横摆趋势连续，禁止阶跃式转向修正。</td><td>控制周期 10 ms；不得触发驱动扭矩增加。</td></tr>
-                <tr><td>FR-04</td><td>仅一个有效转向通道时进入 DEGRADED，限速并声明可实现能力。</td><td>初版速度上限 20 km/h，待整车标定。</td></tr>
-                <tr><td>FR-05</td><td>无有效转向通道时拒绝新任务、进入 MRM，并协调制动、驱动与驻车。</td><td>初版 100 ms 内发出 MRM，减速度不超过 0.3 g。</td></tr>
-                <tr><td>PR-01/02</td><td>健康判断、仲裁和转角更新周期固定；故障检测时间受控。</td><td>周期 10 ms；检测目标不超过 50 ms。</td></tr>
-                <tr><td>PR-03</td><td>热备通道在明确时序内接管并保持指令连续。</td><td>接管目标不超过 100 ms。</td></tr>
-                <tr><td>DR-01</td><td>记录故障码、状态迁移、双通道反馈、指令序列与统一时间戳。</td><td>一次测试可由事件序列独立重建。</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <footer class="slide-foot"><span>系统需求 / SyRS</span><span>12</span></footer>
-      </section>
-
-      <section class="slide" data-page="13">
-        <header class="slide-head">
-          <div><span class="label">INITIAL ARCHITECTURE</span><h2>架构重点是把故障隔离路径画出来</h2></div>
-          <p>双通道不是把同一套资源复制两份；供电、通信、计算、时间源和机械依赖都要检查共因故障。</p>
-        </header>
-        <div class="slide-body">
-          <div class="six-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
-            <div class="plain-box"><h3>A · 主控制通道</h3><p>执行正常转向闭环；自检、温度、指令一致性和车辆响应持续可见。</p></div>
-            <div class="plain-box"><h3>B · 热备控制通道</h3><p>同步运行但输出受控；只在仲裁器确认接管后获得执行权。</p></div>
-            <div class="plain-box"><h3>H · 独立健康判断</h3><p>不只看通信在线，还比较实际转角、电流、温度和车辆横摆响应。</p></div>
-            <div class="plain-box"><h3>M · 锁存式模式仲裁</h3><p>故障后不自动恢复；只有维修确认和重新自检后才允许进入 NORMAL。</p></div>
-            <div class="plain-box"><h3>R · MRM 协调器</h3><p>无有效转向时独立禁止增扭、请求受控减速、准备驻车并通知远程。</p></div>
-            <div class="plain-box"><h3>E · 事件与证据记录</h3><p>统一保存指令、反馈、故障、模式迁移、版本和时间戳。</p></div>
-          </div>
-          <div class="key-message">“未知即不安全”：健康状态不能确认时，不授予正常执行权。</div>
-        </div>
-        <footer class="slide-foot"><span>安全架构 / 初始架构</span><span>13</span></footer>
-      </section>
-
-      <section class="slide" data-page="14">
-        <header class="slide-head">
-          <div><span class="label">STPA</span><h2>从危险反推不安全控制动作</h2></div>
-          <p>本次分析聚焦错误过程模型、反馈失效和接管动作本身带来的风险。</p>
-        </header>
-        <div class="slide-body">
-          <div class="risk-table">
-            <table>
-              <thead><tr><th style="width:15%">危险</th><th style="width:20%">不安全控制动作</th><th style="width:27%">因果场景</th><th>安全约束</th></tr></thead>
-              <tbody>
-                <tr><td>H-01 无法维持预期路径</td><td>UCA-01 健康未知时仍发布 NORMAL</td><td>通信在线被误认为执行器可用；反馈陈旧。</td><td>SC-01 未知状态不授权 NORMAL。</td></tr>
-                <tr><td>H-01 无法维持预期路径</td><td>UCA-02 备份未完成自检即接管</td><td>方向或零位错误，切换成为新风险。</td><td>SC-02 接管前完成自检和授权。</td></tr>
-                <tr><td>H-02 非预期横摆</td><td>UCA-03 接管时未限扭矩就输出大转角</td><td>力矩冲突、积分饱和或指令阶跃。</td><td>SC-03 限扭矩、限变化率并保持闭环。</td></tr>
-                <tr><td>H-01 失去方向控制</td><td>UCA-04 无有效转向时继续驱动</td><td>停车距离和横向裕度持续缩小。</td><td>SC-04 禁止增扭并进入 MRM。</td></tr>
-                <tr><td>H-02 收敛不可预测</td><td>UCA-05 确认失效后延迟请求 MRM</td><td>等待更优决策导致停车窗口缩短。</td><td>SC-05 固定超时并及时安全停车。</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="condition-table" style="margin-top:18px">
-            <table>
-              <thead><tr><th style="width:20%">安全需求</th><th>落实内容</th></tr></thead>
-              <tbody>
-                <tr><td>SAF-01 / 02</td><td>未知状态不得进入 NORMAL；故障必须锁存，未经维修确认不得自动恢复。</td></tr>
-                <tr><td>SAF-03</td><td>双通道不共享单一电源、通信路径或时间源，共性故障必须可检测。</td></tr>
-                <tr><td>SAF-04 / 06</td><td>无转向能力时禁止增扭并进入 MRM；接管期间限制扭矩和转角变化率。</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <footer class="slide-foot"><span>安全分析 / STPA</span><span>14</span></footer>
-      </section>
-
-      <section class="slide" data-page="15">
-        <header class="slide-head">
-          <div><span class="label">VERIFICATION</span><h2>用故障注入证明系统行为</h2></div>
-          <p>每个用例同时检查模式迁移、时序、车辆运动和证据记录，而不只看是否“报警”。</p>
-        </header>
-        <div class="slide-body">
-          <div class="trace-table">
-            <table>
-              <thead><tr><th style="width:10%">用例</th><th style="width:34%">注入条件</th><th>通过证据</th></tr></thead>
-              <tbody>
-                <tr><td>VT-01</td><td>15 km/h 定曲率左转中切断 A 通道使能，B 通道热备。</td><td>检测和接管满足基线；不返回 NORMAL；无驱动增扭。</td></tr>
-                <tr><td>VT-02</td><td>保持旧角度值但停止更新时间戳，并制造指令与实际角度不一致。</td><td>判为未知；禁止 NORMAL；保存完整故障快照。</td></tr>
-                <tr><td>VT-03</td><td>A 通道失效，同时 B 通道自检失败或供电中断。</td><td>及时请求 MRM；禁止驱动增扭；完成受控减速与驻车。</td></tr>
-                <tr><td>VT-04</td><td>断开共享通信或时钟；清除故障码但不维修。</td><td>共性故障可检测；故障锁存；维修确认后才允许重新自检。</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="two-col" style="margin-top:22px;height:auto">
-            <div class="plain-box"><h3>试验顺序</h3><p>模型在环 → 故障注入台架 → 封闭场地低速左转 → 按结果调整速度、转角与减速度边界。</p></div>
-            <div class="plain-box"><h3>未闭合项</h3><p>机械共因、轮胎与载荷影响、时钟同步精度、MRM 停车位置和乘员冲击仍需实车数据。</p></div>
-          </div>
-        </div>
-        <footer class="slide-foot"><span>安全验证 / 故障注入</span><span>15</span></footer>
-      </section>
-
-      <section class="slide" data-page="16">
-        <header class="slide-head">
-          <div><span class="label">SCENARIO LAYERS</span><h2>场景分五层展开</h2></div>
-          <p>从运营环境逐层收敛到模块状态。上层决定任务是否成立，下层决定任务能否执行。</p>
-        </header>
-        <div class="slide-body">
-          <div class="system-map" style="grid-template-columns:repeat(5,1fr)">
-            <div><small>S0 / OPERATIONS</small><h3>运营与体系</h3><p>任务、ODD、调度、云控、远程协助、救援、监管与维护。</p></div>
-            <div><small>S1 / ENVIRONMENT</small><h3>道路与环境</h3><p>交叉口、车道、坡度、附着、天气、光照、视野和交通参与者。</p></div>
-            <div><small>S2 / MISSION</small><h3>车辆任务</h3><p>路线、左转动作、目标速度、加速度、载荷、乘员与停车位置。</p></div>
-            <div><small>S3 / SYSTEM</small><h3>底盘平台</h3><p>模式、执行指令、健康状态、剩余能力、时延与时间戳。</p></div>
-            <div><small>S4 / MODULE</small><h3>执行与模块</h3><p>双转向通道、制动器、驱动、悬架、传感器、电源与通信。</p></div>
-          </div>
-          <div class="two-col" style="margin-top:25px;height:auto">
-            <div class="plain-box"><h3>向下传递</h3><p>任务选择道路与轨迹；平台把轨迹转换为运动能力；模块故障反过来限制上层任务。</p></div>
-            <div class="plain-box"><h3>向上约束</h3><p>ODD 或模块能力不满足时，平台不能只报故障，还要声明还剩多少转向、制动和速度能力。</p></div>
-          </div>
-        </div>
-        <footer class="slide-foot"><span>场景设计 / 分层</span><span>16</span></footer>
-      </section>
-
-      <section class="slide" data-page="17">
-        <header class="slide-head">
-          <div><span class="label">SCENE ELEMENTS</span><h2>每一层需要记录的要素</h2></div>
-          <p>要素选择围绕“可能改变运动任务、能力或安全边界”的信息，避免把场景写成完整环境数据库。</p>
-        </header>
-        <div class="slide-body">
-          <div class="requirements-table">
-            <table>
-              <thead><tr><th style="width:16%">层次</th><th>核心要素</th><th style="width:30%">本作业关注点</th></tr></thead>
-              <tbody>
-                <tr><td>S0 运营与体系</td><td>接驳任务、站点、批准 ODD、调度策略、远程人员、救援与监管。</td><td>车辆是否被允许进入此任务，异常后由谁接收事件。</td></tr>
-                <tr><td>S1 道路与环境</td><td>交叉口类型、车道宽度、坡度、附着、天气、光照、行人与非机动车、对向直行。</td><td>环境是否仍在 ODD 内，可见性和附着是否改变运动边界。</td></tr>
-                <tr><td>S2 车辆任务</td><td>轨迹、曲率、目标速度、加速度、载荷、乘员状态和安全停车位置。</td><td>任务需要多少时间、空间和执行能力。</td></tr>
-                <tr><td>S3 底盘平台</td><td>模式、输入请求、四类执行指令、健康状态、剩余能力、时延和日志。</td><td>系统能否实现任务，何时应限速、降级或 MRM。</td></tr>
-                <tr><td>S4 执行与模块</td><td>转向双通道、制动、驱动、悬架、角度、电流、温度、压力、轮速、电源和通信。</td><td>模块状态是否足以支撑平台声明的最低能力。</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <footer class="slide-foot"><span>场景设计 / 要素</span><span>17</span></footer>
-      </section>
-
-      <section class="slide" data-page="18">
-        <header class="slide-head">
-          <div><span class="label">OPERATING DESIGN DOMAIN</span><h2>正常运行设计条件：运行设计范围</h2></div>
-          <p>下列条件构成课程阶段的正常 ODD。超出范围时，平台应收紧授权或停止任务。</p>
-        </header>
-        <div class="slide-body">
-          <div class="condition-table">
-            <table>
-              <thead><tr><th style="width:12%">类别</th><th>正常条件</th><th style="width:32%">超出条件时</th></tr></thead>
-              <tbody>
-                <tr><td>道路</td><td>批准的城市低速道路；信号或标志明确；车道宽 ≥ 3.25 m；坡度 ≤ 5%；左转半径 &gt; 10 m；标线可识别。</td><td>未批准路段、几何或路权不确定时拒绝任务。</td></tr>
-                <tr><td>交通</td><td>混合交通；存在机动车、行人和非机动车，但其行为能在预测窗口内识别。</td><td>高密度冲突、道路封闭或无法解释的交通行为触发减速或停车。</td></tr>
-                <tr><td>速度</td><td>常规 ≤ 30 km/h；典型左转 12–15 km/h；最终阈值按车型、载荷和附着标定。</td><td>超出能力声明时不得继续推进任务。</td></tr>
-                <tr><td>天气与光照</td><td>道路附着良好；无积水或积雪；白天或满足照明要求的夜间。</td><td>雨雪、大雾、积水、低附着或强逆光时收紧 ODD。</td></tr>
-                <tr><td>通信</td><td>云控可辅助运营，但本地控制、仲裁和 MRM 不依赖公共网络。</td><td>通信中断时保持本地能力，完成安全动作或停车。</td></tr>
-                <tr><td>能量与热</td><td>高压、低压、驱动、制动与控制器温度处于供应商声明范围。</td><td>热降额、能量不足或制动能力下降时更新剩余能力。</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <footer class="slide-foot"><span>运行条件 / ODD</span><span>18</span></footer>
-      </section>
-
-      <section class="slide" data-page="19">
-        <header class="slide-head">
-          <div><span class="label">SYSTEM AND PEOPLE</span><h2>运行设计条件：系统状态与人员状态</h2></div>
-          <p>车辆自检、能力声明和人员职责必须同时满足条件，正常任务才成立。</p>
-        </header>
-        <div class="slide-body">
-          <div class="two-col">
-            <div>
-              <h3 style="margin-top:0">系统状态</h3>
-              <div class="condition-table">
-                <table>
-                  <tbody>
-                    <tr><td>主状态</td><td>NORMAL，无锁存故障，无未确认健康状态。</td></tr>
-                    <tr><td>自检</td><td>双转向、制动、驱动、悬架、传感器、电源与通信通过。</td></tr>
-                    <tr><td>一致性</td><td>指令、反馈和车辆响应在允许误差内；时间戳新鲜且单调。</td></tr>
-                    <tr><td>能力声明</td><td>给出可用转角、速度上限、制动能力、模式原因和有效时间。</td></tr>
-                    <tr><td>时间基准</td><td>AD 请求、平台控制、执行反馈与事件记录可核对。</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div>
-              <h3 style="margin-top:0">人员状态</h3>
-              <div class="condition-table">
-                <table>
-                  <tbody>
-                    <tr><td>车内人员</td><td>正式运营不配驾驶员；乘客坐稳并系安全带；车门关闭。</td></tr>
-                    <tr><td>试验安全员</td><td>初始道路验证阶段可随车，并可使用独立急停。</td></tr>
-                    <tr><td>远程人员</td><td>经过培训，能读取状态、原因和处置项；同时监控车辆数须验证。</td></tr>
-                    <tr><td>授权边界</td><td>远程建议不得绕过本地安全约束、故障锁存和 MRM。</td></tr>
-                    <tr><td>运维与救援</td><td>具备隔离、断电、拖移权限，并知道如何读取危险状态。</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-          <div class="key-message">正常运行的判据是“条件满足且能力已声明”，并非车辆已经上电或某个执行器在线。</div>
-        </div>
-        <footer class="slide-foot"><span>运行条件 / 系统与人员</span><span>19</span></footer>
-      </section>
-
-      <section class="slide" data-page="20">
-        <header class="slide-head">
-          <div><span class="label">TYPICAL SCENARIO</span><h2>典型实例：无保护路口低速左转</h2></div>
-          <p>半载、干沥青、白天；接近 18 km/h，进入冲突区降至约 12 km/h；对向有直行车辆，右缘有等待通行的行人和非机动车。</p>
-        </header>
-        <div class="slide-body">
-          <div class="timeline">
-            <article><time>−8 s</time><h3>任务与 ODD 校验</h3><p>确认路段、天气、载荷和任务均处于批准范围。</p></article>
-            <article><time>−5 s</time><h3>路口识别</h3><p>AD 输出左转轨迹、对向间隙与行人占用。</p></article>
-            <article><time>−2 s</time><h3>平台自检</h3><p>双转向、制动、驱动、悬架健康；状态 NORMAL。</p></article>
-            <article><time>0 s</time><h3>进入左转</h3><p>曲率约 0.067 m⁻¹；分配转角、制动与姿态目标。</p></article>
-            <article><time>2–5 s</time><h3>轨迹跟踪</h3><p>检查实际转角、横摆、轮速和侧向加速度。</p></article>
-            <article><time>6 s</time><h3>退出路口</h3><p>平滑回正，恢复速度并记录任务事件。</p></article>
-          </div>
-          <div class="condition-table" style="margin-top:25px">
-            <table>
-              <thead><tr><th style="width:16%">阶段</th><th>平台动作</th><th style="width:31%">可观察结果</th></tr></thead>
-              <tbody>
-                <tr><td>接近路口</td><td>校验能力，协调制动和能量回收，准备降速。</td><td>减速度在舒适范围；状态 NORMAL。</td></tr>
-                <tr><td>进入冲突区</td><td>轨迹转为车轮转角；限制变化率；协调左右轮驱动。</td><td>路径偏差受控；无持续执行器冲突。</td></tr>
-                <tr><td>弯中跟踪</td><td>闭环修正转角；协调制动与驱动；悬架抑制侧倾。</td><td>横摆趋势稳定；乘员冲击可接受。</td></tr>
-                <tr><td>退出路口</td><td>平滑回正，逐步恢复速度，完成事件记录。</td><td>无残余转向振荡；数据可追溯。</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <footer class="slide-foot"><span>典型场景 / 路口左转</span><span>20</span></footer>
-      </section>
-
-      <section class="slide" data-page="21">
-        <header class="slide-head">
-          <div><span class="label">RISK SCENARIO LIST 1</span><h2>把场景要素偏差转成风险场景</h2></div>
-          <p>采用“过早、过晚、未发生、顺序错误、持续时间过长”的偏差检查。等级为课程阶段初评，需用数据验证。</p>
-        </header>
-        <div class="slide-body">
-          <div class="risk-table">
-            <table>
-              <thead><tr><th style="width:8%">编号</th><th style="width:23%">风险场景</th><th style="width:23%">触发偏差</th><th style="width:22%">可能后果</th><th style="width:10%">S / P</th><th>控制方向</th></tr></thead>
-              <tbody>
-                <tr><td>RT-01</td><td>对向直行车辆遮挡，间隙判断过晚。</td><td>冲突识别延迟，轨迹仍进入左转。</td><td>与对向车辆侧向碰撞。</td><td>S3 / B</td><td>保留间隙不确定性；低置信度禁止进入冲突区。</td></tr>
-                <tr><td>RT-02</td><td>行人或非机动车进入规划路径。</td><td>占用预测更新过晚或未进入约束。</td><td>挤压、碰撞或非预期急停。</td><td>S3 / B</td><td>限速、保留横向裕度、无法确认时停车。</td></tr>
-                <tr><td>RT-03</td><td>前车在入口突然制动。</td><td>制动请求过晚；回馈与液压协同不足。</td><td>追尾、乘员冲击或阻塞路口。</td><td>S2 / B</td><td>准备制动、限制跟车时距、监测热状态。</td></tr>
-                <tr><td>RT-04</td><td>湿滑路面导致车辆偏离左转路径。</td><td>附着估计偏差；扭矩和转角包线未收紧。</td><td>横向稳定性下降，越过车道边界。</td><td>S2 / B</td><td>湿滑条件退出正常 ODD；降低速度与扭矩变化率。</td></tr>
-                <tr><td>RT-05</td><td>左前转向通道在进入路口时失效。</td><td>执行器开路或指令与实际角度持续不一致。</td><td>左转不足或路径突变。</td><td>S3 / B</td><td>双通道健康判断、热备接管、限速和 MRM。</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <p class="small muted" style="margin:12px 0 0">S1：车内可恢复异常；S2：交通冲突或 MRM；S3：存在人员伤害或扩大事故可能。A/B/C：初步低/中/高可能性。</p>
-        </div>
-        <footer class="slide-foot"><span>风险分析 / 风险列表</span><span>21</span></footer>
-      </section>
-
-      <section class="slide" data-page="22">
-        <header class="slide-head">
-          <div><span class="label">RISK SCENARIO LIST 2</span><h2>系统故障和运营偏差同样属于风险场景</h2></div>
-          <p>平台风险不只在机械失效，也包括错误状态、共因故障、能力更新滞后和远程处置误判。</p>
-        </header>
-        <div class="slide-body">
-          <div class="risk-table">
-            <table>
-              <thead><tr><th style="width:8%">编号</th><th style="width:24%">风险场景</th><th style="width:24%">触发偏差</th><th style="width:22%">可能后果</th><th style="width:10%">S / P</th><th>控制方向</th></tr></thead>
-              <tbody>
-                <tr><td>RT-06</td><td>转向反馈卡滞，但系统仍判为 NORMAL。</td><td>通信在线；时间戳或指令一致性检查不足。</td><td>按错误过程模型继续转向。</td><td>S3 / A</td><td>新鲜度、角度、电流和车辆响应多证据判断。</td></tr>
-                <tr><td>RT-07</td><td>备份通道接管产生转角或扭矩阶跃。</td><td>切换过猛；积分饱和或零位不一致。</td><td>非预期横摆或乘员伤害。</td><td>S2 / B</td><td>限扭矩和变化率、抗饱和、接管前自检。</td></tr>
-                <tr><td>RT-08</td><td>双通道共享电源、时钟或通信导致共因失效。</td><td>冗余资源并未真正独立。</td><td>无转向能力且 MRM 协调受影响。</td><td>S3 / A</td><td>独立供电和时间源、共性故障检测、独立 MRM。</td></tr>
-                <tr><td>RT-09</td><td>远程人员延迟确认或被错误状态误导。</td><td>状态不完整、网络延迟或越权命令。</td><td>错过停车窗口或采取不适当处置。</td><td>S2 / B</td><td>本地安全优先，状态含原因与剩余能力。</td></tr>
-                <tr><td>RT-10</td><td>制动或驱动热降额，平台仍按原能力分配任务。</td><td>能力反馈过晚或未更新。</td><td>制动力不足，只能在更差位置停车。</td><td>S2 / B</td><td>持续发布热状态与能力上限；降额后重规划。</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="key-message">风险分析的重点从“零件是否故障”扩展到“系统是否用正确状态和剩余能力支持了当前任务”。</div>
-        </div>
-        <footer class="slide-foot"><span>风险分析 / 风险列表</span><span>22</span></footer>
-      </section>
-
-      <section class="slide" data-page="23">
-        <header class="slide-head">
-          <div><span class="label">CONTROL MAPPING</span><h2>高风险场景回到需求与验证</h2></div>
-          <p>风险不是另起一套清单，而要能追溯到前三次作业的需求、架构和测试。</p>
-        </header>
-        <div class="slide-body">
-          <div class="two-col col-65-35">
-            <div class="trace-table">
-              <table>
-                <thead><tr><th style="width:15%">场景约束</th><th>约束内容</th><th style="width:26%">承接需求</th></tr></thead>
-                <tbody>
-                  <tr><td>SCN-01</td><td>ODD、自检、健康与能力声明同时满足，才允许 NORMAL 并执行左转。</td><td>SR-02 / SR-09 / SAF-01</td></tr>
-                  <tr><td>SCN-02</td><td>规划轨迹超出当前转角、附着或制动能力时，平台拒绝执行并声明不可实现。</td><td>SR-08 / SR-09</td></tr>
-                  <tr><td>SCN-03</td><td>转向能力低于任务需求时进入 DEGRADED；无法维持最低路径能力时进入 MRM。</td><td>FR-04 / FR-05 / SAF-04</td></tr>
-                  <tr><td>SCN-04</td><td>能力、热状态或附着估计显著变化时，按期更新剩余能力。</td><td>SR-02 / SR-11</td></tr>
-                  <tr><td>SCN-05</td><td>远程协助不得覆盖本地故障锁存、安全停车和运动能力限制。</td><td>SR-03 / SR-07</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <div>
-              <div class="risk-matrix" style="margin-top:0">
-                <div class="axis"></div><div class="axis">低</div><div class="axis">中</div><div class="axis">高</div>
-                <div class="axis">S3</div><div class="cell-mid">RT-08</div><div class="cell-high"><span class="marker">RT-05</span> <span class="marker">RT-06</span></div><div class="cell-high"><span class="marker">RT-02</span></div>
-                <div class="axis">S2</div><div class="cell-low">RT-10</div><div class="cell-mid"><span class="marker">RT-03</span> <span class="marker">RT-04</span></div><div class="cell-high"><span class="marker">RT-09</span></div>
-                <div class="axis">S1</div><div class="cell-low"></div><div class="cell-mid"></div><div class="cell-high"></div>
-                <div class="axis"></div><div class="axis">A 低</div><div class="axis">B 中</div><div class="axis">C 高</div>
-              </div>
-              <p class="small muted">初评矩阵用于确定优先验证顺序，不代表已接受的交通风险。</p>
-            </div>
-          </div>
-        </div>
-        <footer class="slide-foot"><span>风险分析 / 控制映射</span><span>23</span></footer>
-      </section>
-
-      <section class="slide" data-page="24">
-        <header class="slide-head">
-          <div><span class="label">END-TO-END TRACE</span><h2>四次作业形成一条完整链路</h2></div>
-          <p>每一项结论都能进入下一阶段，避免汇报时只堆材料而没有系统主线。</p>
-        </header>
-        <div class="slide-body">
-          <div class="timeline" style="grid-template-columns:repeat(4,1fr)">
-            <article><time>01 层级</time><h3>确定系统层级</h3><p>线控底盘平台位于 Systems 层，承接整车运动目标，组织四类执行子系统。</p></article>
-            <article><time>02 需求</time><h3>形成需求来源</h3><p>BR-02、BR-07 与 SR-09、SR-10 共同要求故障可控、能力可声明、证据可追溯。</p></article>
-            <article><time>03 架构</time><h3>定义系统响应</h3><p>通过 FR、PR、DR、SC 和初始架构形成检测、接管、降级、MRM 和验证路径。</p></article>
-            <article><time>04 场景</time><h3>检查运行有效性</h3><p>把需求和架构放入路口左转场景，检查 ODD、人员状态、典型过程与风险场景。</p></article>
-          </div>
-          <div class="condition-table" style="margin-top:30px">
-            <table>
-              <thead><tr><th style="width:16%">汇报问题</th><th>本组回答</th><th style="width:31%">尚需确认</th></tr></thead>
-              <tbody>
-                <tr><td>系统是什么</td><td>面向整车运动的系统级平台，不是单一执行器集合。</td><td>车型范围、整车接口与供应商边界。</td></tr>
-                <tr><td>为什么需要</td><td>无人化运营需要补回人工最终容错，并支持跨车型复用。</td><td>运营目标、法规准入和成本约束。</td></tr>
-                <tr><td>怎样保证安全</td><td>健康监测、双通道接管、能力声明、锁存、MRM 与证据记录。</td><td>阈值、独立性和 MRM 停车位置需验证。</td></tr>
-                <tr><td>在哪些场景有效</td><td>城市低速道路和受控路口左转，超出 ODD 时退出或停车。</td><td>复杂交通、恶劣天气和真实故障率数据。</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <footer class="slide-foot"><span>完整链路 / 需求追溯</span><span>24</span></footer>
-      </section>
-
-      <section class="slide" data-page="25">
-        <header class="slide-head">
-          <div><span class="label">GROUP WORK</span><h2>小组分工与汇报安排</h2></div>
-          <p>按内容和证据分工，每位成员都说明自己负责的判断、图表或验证工作。</p>
-        </header>
-        <div class="slide-body">
-          <div class="requirements-table roles-table">
-            <table>
-              <thead><tr><th style="width:23%">分工</th><th style="width:31%">负责内容</th><th>汇报重点</th></tr></thead>
-              <tbody>
-                <tr><td>组员 1 · 系统与需求</td><td>作业 01、02 的层级、边界、BRS 和 StRS。</td><td>说明为什么选择 Systems 层，以及需求从哪里产生。</td></tr>
-                <tr><td>组员 2 · 架构与安全</td><td>作业 03 的 SyRS、控制结构、STPA 和验证。</td><td>说明单故障如何检测、接管、降级和进入 MRM。</td></tr>
-                <tr><td>组员 3 · 场景与风险</td><td>作业 04 的场景分层、设计条件、典型实例和风险列表。</td><td>说明正常运行条件与风险如何映射回需求。</td></tr>
-                <tr><td>组员 4 · 统稿与资料</td><td>四次作业衔接、图表一致性、来源与现场演示。</td><td>负责完整主线、术语核对和答辩记录。</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="two-col" style="margin-top:22px;height:auto">
-            <div class="plain-box"><h3>建议汇报节奏</h3><p>作业 01 约 2 分钟，作业 02 约 3 分钟，作业 03 约 5 分钟，作业 04 和结论约 5 分钟。</p></div>
-            <div class="plain-box"><h3>现场可演示内容</h3><p>六层需求链、双通道状态迁移、左转场景时间线、风险到需求的追溯表。</p></div>
-          </div>
-        </div>
-        <footer class="slide-foot"><span>小组汇报 / 分工</span><span>25</span></footer>
-      </section>
-
-      <section class="slide" data-page="26">
-        <header class="slide-head">
-          <div><span class="label">CONCLUSION</span><h2>结论</h2></div>
-          <p>本报告完成四次作业的串联，并明确课程阶段可以确认和仍待验证的内容。</p>
-        </header>
-        <div class="slide-body">
-          <div class="three-col" style="height:auto">
-            <div class="plain-box"><h3>系统工程主线</h3><p>从任务与体系出发确定平台边界，再通过 BRS、StRS、SyRS 和安全架构把目标变成可实现、可验证的要求。</p></div>
-            <div class="plain-box"><h3>安全设计重点</h3><p>未知状态不授权正常执行；故障要锁存；备份接管要保持指令连续；无法维持最低能力时进入 MRM。</p></div>
-            <div class="plain-box"><h3>场景分析重点</h3><p>正常任务必须同时满足 ODD、系统健康和人员职责条件。风险来自场景偏差、能力更新滞后和错误状态。</p></div>
-          </div>
-          <h3 style="margin-top:30px">参考与说明</h3>
-          <ol class="source-list">
-            <li>ISO/IEC/IEEE 29148:2018，Requirements engineering。</li>
-            <li>ISO/IEC/IEEE 15288:2023，System life cycle processes。</li>
-            <li>STPA Handbook，Leveson &amp; Thomas，2018。</li>
-            <li>本报告参数均为课程情景基线，不作为量产、法规或安全认证结论。</li>
-          </ol>
-          <div class="key-message" style="margin-top:26px">下一步：与整车和感知团队确认量化阈值，并按仿真、HIL、封闭场地的顺序完成验证。</div>
-        </div>
-        <footer class="slide-foot"><span>H2905 · Complex Systems Engineering · 2026</span><span>26</span></footer>
-      </section>
-    </main>
-  </div>
-
-  <nav class="deck-controls" aria-label="汇报控制">
-    <a href="../" title="返回作业入口">目录</a>
-    <button type="button" data-prev title="上一页">←</button>
-    <span class="counter">01 / 26</span>
-    <button type="button" data-next title="下一页">→</button>
-    <button type="button" data-print title="打印或另存为 PDF">打印</button>
-  </nav>
-  <div class="progress" aria-hidden="true"><span></span></div>
-  <script src="../assets/report.js"></script>
+<div aria-label="汇报主线" class="cover-trace">
+<span><b>01</b><em>系统边界</em></span><i></i>
+<span><b>02</b><em>需求定义</em></span><i></i>
+<span><b>03</b><em>安全架构</em></span><i></i>
+<span><b>04</b><em>运行场景</em></span>
+</div>
+<figure class="cover-visual">
+<svg aria-label="线控底盘平台的运动控制与状态反馈示意图" aria-labelledby="title desc" class="inline-illustration" role="img" viewbox="0 0 720 1000" xmlns="http://www.w3.org/2000/svg">
+<title id="title">线控底盘平台运动控制示意</title>
+<desc id="desc">车辆俯视示意，自动驾驶意图经底盘平台分配到四类执行器，并返回状态。</desc>
+<rect fill="#17343e" height="1000" width="720"></rect>
+<g opacity=".13" stroke="#b8c7c8" stroke-width="1">
+<path d="M0 100H720M0 200H720M0 300H720M0 400H720M0 500H720M0 600H720M0 700H720M0 800H720M0 900H720"></path>
+<path d="M100 0V1000M200 0V1000M300 0V1000M400 0V1000M500 0V1000M600 0V1000"></path>
+</g>
+<g fill="#f2eee3" font-family="Microsoft YaHei, sans-serif">
+<text font-size="16" letter-spacing="3" x="72" y="92">MOTION / PLATFORM</text>
+<text font-size="12" opacity=".55" x="72" y="128">INTENT → ARBITRATION → ACTUATION → STATE</text>
+</g>
+<g transform="translate(0 130)">
+<rect fill="none" height="365" rx="118" stroke="#d5d9d2" stroke-width="2" width="420" x="150" y="270"></rect>
+<rect fill="none" height="220" rx="65" stroke="#8fa5a8" stroke-width="1.5" width="314" x="203" y="344"></rect>
+<g fill="#1f4551" stroke="#d4dbd6" stroke-width="2">
+<rect height="112" rx="18" width="62" x="104" y="305"></rect>
+<rect height="112" rx="18" width="62" x="554" y="305"></rect>
+<rect height="112" rx="18" width="62" x="104" y="494"></rect>
+<rect height="112" rx="18" width="62" x="554" y="494"></rect>
+</g>
+<g fill="none" stroke-width="2">
+<path d="M166 361H265M455 361H554" stroke="#72a5a8"></path>
+<path d="M166 550H265M455 550H554" stroke="#9f8865"></path>
+</g>
+<rect fill="#e8e4d8" height="104" rx="8" width="120" x="300" y="397"></rect>
+<path d="M325 422H395M325 441H395M325 460H372" stroke="#284b58" stroke-linecap="round" stroke-width="4"></path>
+<circle cx="360" cy="480" fill="#98543e" r="5"></circle>
+<g fill="#f1ede3" font-family="Microsoft YaHei, sans-serif" font-size="11">
+<text x="74" y="289">AD REQUEST</text>
+<text x="275" y="380">MOTION CORE</text>
+<text x="588" y="289">STEER A/B</text>
+<text x="600" y="558">BRAKE</text>
+<text x="63" y="558">DRIVE</text>
+</g>
+<g fill="none" stroke="#d7ddd8" stroke-width="1.5">
+<path d="M257 418H300" stroke-dasharray="5 6"></path>
+<path d="M420 418H463" stroke-dasharray="5 6"></path>
+<path d="M360 501V550" stroke-dasharray="5 6"></path>
+</g>
+</g>
+<g transform="translate(72 790)">
+<text fill="#e7e3d8" font-family="Microsoft YaHei, sans-serif" font-size="13" x="0" y="0">运行状态</text>
+<g font-family="Cascadia Mono, Consolas, monospace" font-size="11">
+<rect fill="#d9decf" height="42" width="132" x="0" y="22"></rect>
+<text fill="#17343e" x="18" y="48">NORMAL</text>
+<rect fill="#c8a36a" height="42" width="148" x="146" y="22"></rect>
+<text fill="#17343e" x="164" y="48">DEGRADED</text>
+<rect fill="#b9654b" height="42" width="112" x="308" y="22"></rect>
+<text fill="#fffaf0" x="326" y="48">MRM</text>
+<rect fill="none" height="42" stroke="#778b8d" width="132" x="434" y="22"></rect>
+<text fill="#dce2dd" x="452" y="48">SAFE STOP</text>
+</g>
+</g>
+<g fill="none" stroke="#8ba0a1" stroke-width="1" transform="translate(72 920)">
+<path d="M0 0H576"></path>
+<circle cx="0" cy="0" fill="#b9654b" r="4" stroke="none"></circle>
+<circle cx="576" cy="0" fill="#c8a36a" r="4" stroke="none"></circle>
+</g>
+</svg>
+<figcaption>运动意图 → 协同仲裁 → 执行反馈</figcaption>
+</figure>
+<div class="cover-meta">
+<div><small>COURSE</small><strong>Complex Systems Engineering</strong></div>
+<div><small>SYSTEM</small><strong>X-by-wire Chassis Platform</strong></div>
+<div><small>REPORT</small><strong>系统设计与运行分析</strong></div>
+<div><small>DATE</small><strong>2026.11</strong></div>
+</div>
+</section>
+<section class="slide" data-page="02">
+<header class="slide-head">
+<div><span class="label">ANALYTICAL FRAME</span><h2>从系统边界到运行证据</h2></div>
+<p>本汇报围绕一个系统对象展开。先界定边界，再闭合需求和架构，最后放回具体运行场景验证。</p>
+</header>
+<div class="slide-body">
+<div class="three-col">
+<div class="plain-box">
+<span class="label">01 / BOUNDARY</span>
+<h3>系统是什么</h3>
+<p>明确平台在任务、体系、整车与执行子系统之间的层级和职责，划清感知、规划与执行器本体的边界。</p>
+</div>
+<div class="plain-box">
+<span class="label">02 / CLOSURE</span>
+<h3>需求如何闭合</h3>
+<p>从运营业务和相关方需求出发，形成 SyRS、控制结构、安全架构与可验证证据，避免需求停在描述层面。</p>
+</div>
+<div class="plain-box">
+<span class="label">03 / OPERATION</span>
+<h3>运行是否有效</h3>
+<p>把系统放进路口左转场景，检查 ODD、人员状态、故障降级与风险控制是否与设计假设一致。</p>
+</div>
+</div>
+<div class="state-strip">
+<div><small>输入</small><strong>运营任务</strong><p>ODD、场景与相关方目标</p></div>
+<div><small>转换</small><strong>需求闭合</strong><p>BRS / StRS / SyRS</p></div>
+<div><small>实现</small><strong>安全架构</strong><p>双通道、仲裁与 MRM</p></div>
+<div><small>输出</small><strong>运行证据</strong><p>验证结果与风险控制</p></div>
+</div>
+<div class="key-message">分析顺序固定为：先回答系统边界，再回答需求为什么成立，最后回答运行条件下如何证明安全。</div>
+</div>
+<footer class="slide-foot"><span>分析框架 / 系统—需求—运行</span><span>02</span></footer>
+</section>
+<section class="slide" data-page="03">
+<header class="slide-head">
+<div><span class="label">SYSTEM BOUNDARY</span><h2>系统对象与边界</h2></div>
+<p>平台位于 Systems 层，向上接收运动意图，向下协调转向、制动、驱动与悬架。</p>
+</header>
+<div class="slide-body">
+<div class="arrow-row">
+<div class="node"><strong>AD 域</strong><span>轨迹 / 速度 / 停车</span></div><div class="arrow">→</div>
+<div class="node"><strong>线控底盘平台</strong><span>解释 / 协同 / 仲裁</span></div><div class="arrow">→</div>
+<div class="node"><strong>四类执行子系统</strong><span>转向 / 制动 / 驱动 / 悬架</span></div><div class="arrow">→</div>
+<div class="node"><strong>整车运动</strong><span>路径 / 速度 / 姿态</span></div>
+</div>
+<div class="three-col" style="height:auto">
+<div class="plain-box"><h3>范围内</h3><p>运动意图解释、多执行器协同、冗余仲裁、状态估计、故障降级、统一接口与事件记录。</p></div>
+<div class="plain-box"><h3>范围外</h3><p>感知算法、全局路径规划、云端调度，以及单电机、制动卡钳等执行器机械本体设计。</p></div>
+<div class="plain-box"><h3>边界原则</h3><p>上层给出任务意图，平台必须说明当前能力；能力未知或不足时，不得默认继续正常执行。</p></div>
+</div>
+<div class="key-message">平台的核心输出不是“某个执行器已在线”，而是“当前仍可完成什么运动，以及还能持续多久”。</div>
+</div>
+<footer class="slide-foot"><span>系统层级 / 系统边界</span><span>03</span></footer>
+</section>
+<section class="slide" data-page="04">
+<header class="slide-head">
+<div><span class="label">SIX LEVELS</span><h2>六层系统分析</h2></div>
+<p>每一层都需要说明对象、输入、输出和与线控底盘平台的连接关系。</p>
+</header>
+<div class="slide-body">
+<div class="system-map">
+<div><small>L1 / MISSION</small><h3>任务</h3><p>安全、连续地完成高级别自动驾驶出行或接驳。</p></div>
+<div><small>L2 / SoS</small><h3>体系</h3><p>车队、云控、路侧、补能、救援与监管共同提供运营条件。</p></div>
+<div><small>L3 / VEHICLE</small><h3>整车</h3><p>以轨迹、速度、加速度和停车位置承载任务。</p></div>
+<div><small>L4 / SYSTEM</small><h3>线控底盘平台</h3><p>把运动意图分配为四类执行能力，并持续声明剩余能力。</p></div>
+<div><small>L5 / SUBSYSTEM</small><h3>子系统</h3><p>转向、制动、驱动和悬架分别形成横向、纵向和垂向能力。</p></div>
+<div><small>L6 / MODULE</small><h3>模块</h3><p>电机、控制器、传感器、电源和通信提供可观测的物理执行。</p></div>
+</div>
+<div class="state-strip">
+<div><small>分析对象</small><strong>Systems</strong><p>跨子系统集成平台</p></div>
+<div><small>向上关系</small><strong>承接意图</strong><p>整车运动与安全约束</p></div>
+<div><small>向下关系</small><strong>组织执行</strong><p>四类底盘子系统</p></div>
+<div><small>核心边界</small><strong>能力声明</strong><p>可用、受限、MRM、隔离</p></div>
+</div>
+</div>
+<footer class="slide-foot"><span>系统层级 / 六层分析</span><span>04</span></footer>
+</section>
+<section class="slide" data-page="05">
+<header class="slide-head">
+<div><span class="label">TRACEABILITY</span><h2>一个左转任务如何向下传递</h2></div>
+<p>用同一场景检查六层之间的接口和责任，避免每层各写一套互不对应的需求。</p>
+</header>
+<div class="slide-body">
+<div class="timeline">
+<article><time>任务</time><h3>完成无人接驳</h3><p>安全到达站点，不依赖车内驾驶员。</p></article>
+<article><time>体系</time><h3>批准 ODD 与任务</h3><p>调度下发站点、路段、天气边界和救援条件。</p></article>
+<article><time>整车</time><h3>规划左转轨迹</h3><p>选择 12–15 km/h、曲率和安全停车位置。</p></article>
+<article><time>系统</time><h3>分解运动指令</h3><p>生成转角、制动、轮端扭矩和姿态目标。</p></article>
+<article><time>子系统</time><h3>执行器协同</h3><p>跟踪角度、控制速度、抑制侧倾。</p></article>
+<article><time>模块</time><h3>状态反馈</h3><p>回传角度、电流、温度、轮速和健康状态。</p></article>
+</div>
+<div class="two-col col-55-45" style="margin-top:28px;height:auto">
+<div class="plain-box">
+<h3>设计含义</h3>
+<p>任务层改变会向下传递约束；模块级能力不足也必须向上形成能力声明。缺少任何一层，需求链都会在集成或验证阶段断开。</p>
+</div>
+<div class="plain-box">
+<h3>课程示例参数</h3>
+<p>左转车轮转角约 +32.5°、目标车速约 12 km/h、整体状态 NORMAL。该组参数仅用于解释传递关系，不作为量产结论。</p>
+</div>
+</div>
+</div>
+<footer class="slide-foot"><span>系统层级 / 场景传递</span><span>05</span></footer>
+</section>
+<section class="slide" data-page="06">
+<header class="slide-head">
+<div><span class="label">CONOPS / OPSCON</span><h2>运营概念与系统运行概念</h2></div>
+<p>ConOps 描述业务怎样运转，OpsCon 说明线控底盘平台在其中承担什么。</p>
+</header>
+<div class="slide-body">
+<div class="two-col">
+<div class="plain-box">
+<h3>ConOps：城市 L4 出行服务</h3>
+<ul>
+<li>运营公司组织车辆、云控、路侧、补能、维护与救援资源。</li>
+<li>车辆在批准的 ODD、车辆状态和任务边界内提供载客服务。</li>
+<li>每次行程、故障和维护数据回到运营决策与安全证据。</li>
+</ul>
+</div>
+<div class="plain-box">
+<h3>OpsCon：线控底盘平台</h3>
+<ul>
+<li>输入：轨迹、速度、加速度、安全停车请求和整车状态。</li>
+<li>处理：意图解释、执行分配、协同、仲裁、降级和状态估计。</li>
+<li>输出：转角、制动力、轮端扭矩、姿态指令及剩余能力。</li>
+</ul>
+</div>
+</div>
+<div class="state-strip">
+<div><small>NORMAL</small><strong>全通道能力</strong><p>执行常规任务</p></div>
+<div><small>DEGRADED</small><strong>受限但可控</strong><p>降低速度或任务范围</p></div>
+<div><small>MRM</small><strong>最小风险机动</strong><p>禁止新任务并安全停车</p></div>
+<div><small>SAFE_STOP</small><strong>驻车与隔离</strong><p>等待维修或救援</p></div>
+</div>
+<div class="key-message">公共网络可以辅助运营，但本地运动控制、故障仲裁和 MRM 不能依赖云控链路。</div>
+</div>
+<footer class="slide-foot"><span>需求定义 / 运营概念</span><span>06</span></footer>
+</section>
+<section class="slide" data-page="07">
+<header class="slide-head">
+<div><span class="label">STAKEHOLDERS</span><h2>相关方需要并不总和</h2></div>
+<p>需求定义不仅收集愿望，也要把安全、效率、成本和合规之间的冲突显式写出来。</p>
+</header>
+<div class="slide-body">
+<div class="requirements-table">
+<table>
+<thead><tr><th style="width:15%">相关方</th><th style="width:27%">主要需要</th><th style="width:26%">可能冲突</th><th>处理方向</th></tr></thead>
+<tbody>
+<tr><td>乘客</td><td>安全、平顺、状态可理解。</td><td>紧急制动与乘员舒适性。</td><td>区分正常、紧急和 MRM 减速度包线。</td></tr>
+<tr><td>运营方</td><td>连续服务、成本可控。</td><td>安全裕度与车辆可用率。</td><td>风险分级、恢复流程和能力化调度。</td></tr>
+<tr><td>云控与远程人员</td><td>掌握真实能力与事件。</td><td>远程效率与本地安全授权。</td><td>本地安全逻辑优先，远程不得绕过锁存。</td></tr>
+<tr><td>开发与安全团队</td><td>稳定接口和完整证据。</td><td>迭代速度与验证充分性。</td><td>版本化接口、变更影响分析和回归。</td></tr>
+<tr><td>监管与保险方</td><td>记录完整、责任可追溯。</td><td>证据范围与数据隐私。</td><td>最小必要采集、分级保存和授权访问。</td></tr>
+<tr><td>维修与供应商</td><td>可隔离、可诊断、责任清晰。</td><td>平台统一性与专有方案。</td><td>接口控制文档、维护模式和隔离点。</td></tr>
+<tr><td>其他道路参与者</td><td>车辆行为可预测。</td><td>运营效率与轨迹激进度。</td><td>降级和 MRM 不超出可控车辆边界。</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<footer class="slide-foot"><span>需求定义 / 相关方</span><span>07</span></footer>
+</section>
+<section class="slide" data-page="08">
+<header class="slide-head">
+<div><span class="label">BRS / STRS</span><h2>从业务目标到相关方需求</h2></div>
+<p>BRS 采用 BR-01 至 BR-10；StRS 采用 SR-01 至 SR-22。本次汇报只展示与后续安全场景直接相关的需求。</p>
+</header>
+<div class="slide-body">
+<div class="requirements-table">
+<table>
+<thead><tr><th style="width:9%">编号</th><th>需求摘要</th><th style="width:28%">通过准则</th></tr></thead>
+<tbody>
+<tr><td>BR-01</td><td>在定义 ODD 内完成无人化接驳，不依赖车内驾驶员完成常规行程。</td><td>批准 ODD 内完成无人运行验证与运营审核。</td></tr>
+<tr><td>BR-02</td><td>避免底盘运动执行单点失效导致不可控运动。</td><td>安全分析、故障注入与台架或实车证据闭环。</td></tr>
+<tr><td>BR-04</td><td>乘客获得可解释、与安全约束一致的运动体验。</td><td>加速度、冲击与姿态满足舒适基线。</td></tr>
+<tr><td>BR-07</td><td>任务、故障、降级、维护与验证数据形成证据链。</td><td>安全要求可追溯至场景、实现和测试。</td></tr>
+<tr><td>SR-02</td><td>持续发布可用、受限、MRM、隔离状态。</td><td>整车与云控一致解析，状态迁移正确。</td></tr>
+<tr><td>SR-08</td><td>把轨迹和停车意图转换为相互约束的执行指令。</td><td>场景验证无持续执行器冲突。</td></tr>
+<tr><td>SR-09</td><td>关键执行通道单点故障时检测、隔离并保持最低能力。</td><td>满足降级包线或进入 MRM。</td></tr>
+<tr><td>SR-10</td><td>无法维持最低能力时进入并保持 MRM。</td><td>MRM 可重复进入，驻车状态可确认。</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<footer class="slide-foot"><span>需求定义 / 需求基线</span><span>08</span></footer>
+</section>
+<section class="slide" data-page="09">
+<header class="slide-head">
+<div><span class="label">REQUIREMENT HANDOFF</span><h2>进入安全设计前的需求接口</h2></div>
+<p>进入系统需求阶段前，需要把业务目标、相关方需要和验证证据接起来。</p>
+</header>
+<div class="slide-body">
+<div class="arrow-row">
+<div class="node"><strong>业务目标</strong><span>BR-02 / BR-07</span></div><div class="arrow">→</div>
+<div class="node"><strong>相关方需求</strong><span>SR-09 / SR-10</span></div><div class="arrow">→</div>
+<div class="node"><strong>系统场景</strong><span>左前通道失效</span></div><div class="arrow">→</div>
+<div class="node"><strong>验证证据</strong><span>FR / PR / DR</span></div>
+</div>
+<div class="three-col" style="height:auto">
+<div class="plain-box"><h3>已确认</h3><p>平台必须支持无人运营；关键执行单点故障不得导致不可控运动；状态和证据必须可追溯。</p></div>
+<div class="plain-box"><h3>待协商</h3><p>具体速度阈值、允许的降级能力、故障恢复时长、日志保存期限和远程人员车辆比。</p></div>
+<div class="plain-box"><h3>进入安全设计</h3><p>选择“15 km/h 路口左转、左前转向通道失效”作为可注入、可观察、可验证的系统切片。</p></div>
+</div>
+</div>
+<footer class="slide-foot"><span>需求定义 / 场景衔接</span><span>09</span></footer>
+</section>
+<section class="slide" data-page="10">
+<header class="slide-head">
+<div><span class="label">VALIDATION SLICE</span><h2>先限定一个可以验收的切片</h2></div>
+<p>系统边界只覆盖平台对左前转向通道故障的检测、仲裁、接管、能力声明和 MRM。</p>
+</header>
+<div class="slide-body">
+<div class="three-col">
+<div class="plain-box"><span class="label">SYSTEM UNDER STUDY</span><h3>线控底盘平台</h3><p>接收 AD 轨迹与速度意图，协调双转向通道、制动和驱动，并实时声明剩余能力。</p></div>
+<div class="plain-box"><span class="label">FAULT TRIGGER</span><h3>左前转向通道失能</h3><p>执行器开路、反馈失效，或指令与实际角度持续不一致。机械本体设计不属于本切片。</p></div>
+<div class="plain-box"><span class="label">ACCEPTANCE RESULT</span><h3>降级可控或安全停车</h3><p>不能悄悄回到 NORMAL；最终状态应为 DEGRADED、MRM 或 SAFE_STOP。</p></div>
+</div>
+<div class="condition-table" style="margin-top:24px">
+<table>
+<thead><tr><th>初始条件</th><th>课程验证基线</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>道路</td><td>干沥青，左转半径约 15 m</td><td>后续需按整车动力学和试验道路确认。</td></tr>
+<tr><td>车辆</td><td>半载，车速 15 km/h</td><td>用于建立单故障切片的初始参数。</td></tr>
+<tr><td>时间目标</td><td>检测约 50 ms，接管约 100 ms</td><td>作为待验证指标，不构成量产承诺。</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<footer class="slide-foot"><span>系统需求 / 验证切片</span><span>10</span></footer>
+</section>
+<section class="slide" data-page="11">
+<header class="slide-head">
+<div><span class="label">CONTROL STRUCTURE</span><h2>控制结构与状态迁移</h2></div>
+<p>AD 域负责运动意图；平台负责可实现性、仲裁和降级；执行器与车辆状态回到平台形成闭环。</p>
+</header>
+<div class="slide-body">
+<div class="system-map" style="grid-template-columns:repeat(5,1fr)">
+<div><small>COMMAND</small><h3>AD 运动请求</h3><p>曲率、目标速度、加速度上限、安全停车请求。</p></div>
+<div><small>HEALTH</small><h3>独立健康判断</h3><p>指令、角度、电流、温度和通信新鲜度。</p></div>
+<div><small>AUTHORITY</small><h3>锁存式仲裁</h3><p>决定模式，阻止未知状态回到 NORMAL。</p></div>
+<div><small>EXECUTION</small><h3>双通道转向</h3><p>A 主执行，B 热备；制动和驱动受同一模式约束。</p></div>
+<div><small>FEEDBACK</small><h3>车辆状态</h3><p>转角、横摆、轮速、剩余能力和事件序号。</p></div>
+</div>
+<div class="state-strip">
+<div><small>S0 · NORMAL</small><strong>双通道有效</strong><p>正常转向与速度请求</p></div>
+<div><small>S1 · DEGRADED</small><strong>单通道有效</strong><p>B 接管，限速并声明能力</p></div>
+<div><small>S2 · MRM</small><strong>无有效转向</strong><p>禁止新任务、协调受控停车</p></div>
+<div><small>S3 · SAFE_STOP</small><strong>驻车与隔离</strong><p>事件记录、通知、等待维修</p></div>
+</div>
+<div class="key-message">关键反馈不能只写“是否在线”，还要给出模式、剩余转角、速度上限、原因和有效时间。</div>
+</div>
+<footer class="slide-foot"><span>系统需求 / 控制结构</span><span>11</span></footer>
+</section>
+<section class="slide" data-page="12">
+<header class="slide-head">
+<div><span class="label">SYSTEM REQUIREMENTS</span><h2>系统需求规格：只写可实现、可验证的内容</h2></div>
+<p>SyRS 以 FR、PR、DR 编号，并直接追溯到相关方需求和 STPA 安全约束。</p>
+</header>
+<div class="slide-body">
+<div class="requirements-table">
+<table>
+<thead><tr><th style="width:9%">编号</th><th>需求陈述</th><th style="width:33%">初始验收方向</th></tr></thead>
+<tbody>
+<tr><td>FR-01</td><td>同时监测双通道指令、实际角度、电流、使能和通信新鲜度，区分有效、降级、未知和故障。</td><td>两类以上独立证据不一致时不得保持有效。</td></tr>
+<tr><td>FR-02</td><td>主通道失效时锁存故障、阻断错误指令，并切换至已通过自检的热备通道。</td><td>故障后不自动返回 NORMAL。</td></tr>
+<tr><td>FR-03</td><td>切换时保持转角和横摆趋势连续，禁止阶跃式转向修正。</td><td>控制周期 10 ms；不得触发驱动扭矩增加。</td></tr>
+<tr><td>FR-04</td><td>仅一个有效转向通道时进入 DEGRADED，限速并声明可实现能力。</td><td>初版速度上限 20 km/h，待整车标定。</td></tr>
+<tr><td>FR-05</td><td>无有效转向通道时拒绝新任务、进入 MRM，并协调制动、驱动与驻车。</td><td>初版 100 ms 内发出 MRM，减速度不超过 0.3 g。</td></tr>
+<tr><td>PR-01/02</td><td>健康判断、仲裁和转角更新周期固定；故障检测时间受控。</td><td>周期 10 ms；检测目标不超过 50 ms。</td></tr>
+<tr><td>PR-03</td><td>热备通道在明确时序内接管并保持指令连续。</td><td>接管目标不超过 100 ms。</td></tr>
+<tr><td>DR-01</td><td>记录故障码、状态迁移、双通道反馈、指令序列与统一时间戳。</td><td>一次测试可由事件序列独立重建。</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<footer class="slide-foot"><span>系统需求 / SyRS</span><span>12</span></footer>
+</section>
+<section class="slide" data-page="13">
+<header class="slide-head">
+<div><span class="label">INITIAL ARCHITECTURE</span><h2>架构重点是把故障隔离路径画出来</h2></div>
+<p>双通道不是把同一套资源复制两份；供电、通信、计算、时间源和机械依赖都要检查共因故障。</p>
+</header>
+<div class="slide-body">
+<div class="two-col col-65-35">
+<figure class="slide-image">
+<svg aria-label="双通道转向、独立健康判断、锁存仲裁与最小风险机动架构" aria-labelledby="title desc" class="inline-illustration" role="img" viewbox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg">
+<title id="title">双通道转向架构与故障降级</title>
+<desc id="desc">主通道失效后，独立健康判断将执行权交给热备通道，无法维持能力时进入MRM。</desc>
+<rect fill="#f1efe7" height="700" width="1200"></rect>
+<g opacity=".55" stroke="#d2cfc4" stroke-width="1">
+<path d="M0 100H1200M0 200H1200M0 300H1200M0 400H1200M0 500H1200M0 600H1200"></path>
+<path d="M100 0V700M200 0V700M300 0V700M400 0V700M500 0V700M600 0V700M700 0V700M800 0V700M900 0V700M1000 0V700M1100 0V700"></path>
+</g>
+<g transform="translate(70 88)">
+<text fill="#244653" font-family="Cascadia Mono, Consolas, monospace" font-size="13" letter-spacing="3" x="0" y="0">FAIL-OPERATIONAL / STEERING</text>
+<text fill="#707777" font-family="Microsoft YaHei, sans-serif" font-size="14" x="0" y="34">单通道失效后，系统只允许降级运行或进入最小风险状态。</text>
+</g>
+<g font-family="Microsoft YaHei, sans-serif">
+<g transform="translate(72 190)">
+<rect fill="#274955" height="126" width="210"></rect>
+<text fill="#aebfc0" font-family="Cascadia Mono, Consolas, monospace" font-size="10" x="20" y="34">A / PRIMARY</text>
+<text fill="#f8f5ed" font-size="20" x="20" y="68">主控制通道</text>
+<text fill="#c8d1cf" font-size="12" x="20" y="94">指令闭环 · 实际转角 · 电流</text>
+<circle cx="182" cy="101" fill="#bd654b" r="8"></circle>
+</g>
+<g transform="translate(72 352)">
+<rect fill="#e1e4dc" height="126" stroke="#9ba49d" width="210"></rect>
+<text fill="#6b7472" font-family="Cascadia Mono, Consolas, monospace" font-size="10" x="20" y="34">B / HOT STANDBY</text>
+<text fill="#244653" font-size="20" x="20" y="68">热备控制通道</text>
+<text fill="#657170" font-size="12" x="20" y="94">受控输出 · 自检 · 待授权</text>
+</g>
+<g transform="translate(382 190)">
+<rect fill="#fbfaf5" height="288" stroke="#a8afa8" width="212"></rect>
+<text fill="#80503d" font-family="Cascadia Mono, Consolas, monospace" font-size="10" x="22" y="36">INDEPENDENT MONITOR</text>
+<text fill="#244653" font-size="20" x="22" y="72">独立健康判断</text>
+<path d="M22 102H190M22 132H190M22 162H190M22 192H150" stroke="#d4d1c7"></path>
+<text fill="#67716f" font-size="12" x="22" y="122">时间戳 / 新鲜度</text>
+<text fill="#67716f" font-size="12" x="22" y="152">指令 / 角度一致性</text>
+<text fill="#67716f" font-size="12" x="22" y="182">车辆横摆与响应</text>
+<text fill="#8f4d39" font-size="12" x="22" y="220">未知状态 → 不授权 NORMAL</text>
+<rect fill="#eee4dc" height="28" width="168" x="22" y="242"></rect>
+<text fill="#80503d" font-size="11" x="34" y="261">2oo2 合理性判断</text>
+</g>
+<g transform="translate(694 190)">
+<rect fill="#d7dccf" height="126" width="204"></rect>
+<text fill="#5b6860" font-family="Cascadia Mono, Consolas, monospace" font-size="10" x="20" y="34">ARBITRATION</text>
+<text fill="#244653" font-size="20" x="20" y="68">锁存式仲裁</text>
+<text fill="#5f6c67" font-size="12" x="20" y="94">降级后不自动返回</text>
+</g>
+<g transform="translate(694 352)">
+<rect fill="#b9674c" height="126" width="204"></rect>
+<text fill="#f0ded5" font-family="Cascadia Mono, Consolas, monospace" font-size="10" x="20" y="34">MRM / FALLBACK</text>
+<text fill="#fffaf2" font-size="20" x="20" y="68">最小风险机动</text>
+<text fill="#f5e4db" font-size="12" x="20" y="94">禁增扭 · 减速 · 驻车</text>
+</g>
+<g transform="translate(990 210)">
+<rect fill="#17343e" height="236" width="138"></rect>
+<text fill="#9eb1b2" font-family="Cascadia Mono, Consolas, monospace" font-size="9" x="20" y="36">OUTPUT</text>
+<text fill="#f8f5ed" font-size="18" x="20" y="75">可控运动</text>
+<path d="M20 96H116" stroke="#718a8c"></path>
+<text fill="#c2cdca" font-size="12" x="20" y="126">路径连续</text>
+<text fill="#c2cdca" font-size="12" x="20" y="154">速度受限</text>
+<text fill="#c2cdca" font-size="12" x="20" y="182">状态可追溯</text>
+</g>
+</g>
+<g fill="none" stroke="#819192" stroke-width="2">
+<path d="M282 253H382M282 415H382M594 334H694"></path>
+<path d="M796 253V352"></path>
+<path d="M898 415H990"></path>
+</g>
+<g fill="#8f4d39">
+<path d="M374 247L388 253L374 259Z"></path>
+<path d="M374 409L388 415L374 421Z"></path>
+<path d="M686 328L700 334L686 340Z"></path>
+<path d="M982 409L996 415L982 421Z"></path>
+</g>
+</svg>
+<figcaption>FAIL-OPERATIONAL / 单通道失效后的控制路径</figcaption>
+</figure>
+<div class="compact-list">
+<article><b>A / B</b><div><h3>主通道与热备通道</h3><p>两通道持续自检，热备输出受控；只有在仲裁器授权后才接管执行权。</p></div></article>
+<article><b>H</b><div><h3>独立健康判断</h3><p>同时比较指令、实际转角、电流、温度、时间戳和车辆横摆响应。</p></div></article>
+<article><b>M</b><div><h3>锁存式模式仲裁</h3><p>故障或未知状态不得回到 NORMAL，恢复必须经过维修确认和重新自检。</p></div></article>
+<article><b>R / E</b><div><h3>MRM 与证据记录</h3><p>无有效转向时禁止增扭、受控停车；完整保存模式迁移、反馈和版本。</p></div></article>
+</div>
+</div>
+<div class="key-message contrast">“未知即不安全”：健康状态不能确认时，不授予正常执行权。</div>
+</div>
+<footer class="slide-foot"><span>安全架构 / 初始架构</span><span>13</span></footer>
+</section>
+<section class="slide" data-page="14">
+<header class="slide-head">
+<div><span class="label">STPA</span><h2>从危险反推不安全控制动作</h2></div>
+<p>本次分析聚焦错误过程模型、反馈失效和接管动作本身带来的风险。</p>
+</header>
+<div class="slide-body">
+<div class="risk-table">
+<table>
+<thead><tr><th style="width:15%">危险</th><th style="width:20%">不安全控制动作</th><th style="width:27%">因果场景</th><th>安全约束</th></tr></thead>
+<tbody>
+<tr><td>H-01 无法维持预期路径</td><td>UCA-01 健康未知时仍发布 NORMAL</td><td>通信在线被误认为执行器可用；反馈陈旧。</td><td>SC-01 未知状态不授权 NORMAL。</td></tr>
+<tr><td>H-01 无法维持预期路径</td><td>UCA-02 备份未完成自检即接管</td><td>方向或零位错误，切换成为新风险。</td><td>SC-02 接管前完成自检和授权。</td></tr>
+<tr><td>H-02 非预期横摆</td><td>UCA-03 接管时未限扭矩就输出大转角</td><td>力矩冲突、积分饱和或指令阶跃。</td><td>SC-03 限扭矩、限变化率并保持闭环。</td></tr>
+<tr><td>H-01 失去方向控制</td><td>UCA-04 无有效转向时继续驱动</td><td>停车距离和横向裕度持续缩小。</td><td>SC-04 禁止增扭并进入 MRM。</td></tr>
+<tr><td>H-02 收敛不可预测</td><td>UCA-05 确认失效后延迟请求 MRM</td><td>等待更优决策导致停车窗口缩短。</td><td>SC-05 固定超时并及时安全停车。</td></tr>
+</tbody>
+</table>
+</div>
+<div class="condition-table" style="margin-top:18px">
+<table>
+<thead><tr><th style="width:20%">安全需求</th><th>落实内容</th></tr></thead>
+<tbody>
+<tr><td>SAF-01 / 02</td><td>未知状态不得进入 NORMAL；故障必须锁存，未经维修确认不得自动恢复。</td></tr>
+<tr><td>SAF-03</td><td>双通道不共享单一电源、通信路径或时间源，共性故障必须可检测。</td></tr>
+<tr><td>SAF-04 / 06</td><td>无转向能力时禁止增扭并进入 MRM；接管期间限制扭矩和转角变化率。</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<footer class="slide-foot"><span>安全分析 / STPA</span><span>14</span></footer>
+</section>
+<section class="slide" data-page="15">
+<header class="slide-head">
+<div><span class="label">VERIFICATION</span><h2>用故障注入证明系统行为</h2></div>
+<p>每个用例同时检查模式迁移、时序、车辆运动和证据记录，而不只看是否“报警”。</p>
+</header>
+<div class="slide-body">
+<div class="trace-table">
+<table>
+<thead><tr><th style="width:10%">用例</th><th style="width:34%">注入条件</th><th>通过证据</th></tr></thead>
+<tbody>
+<tr><td>VT-01</td><td>15 km/h 定曲率左转中切断 A 通道使能，B 通道热备。</td><td>检测和接管满足基线；不返回 NORMAL；无驱动增扭。</td></tr>
+<tr><td>VT-02</td><td>保持旧角度值但停止更新时间戳，并制造指令与实际角度不一致。</td><td>判为未知；禁止 NORMAL；保存完整故障快照。</td></tr>
+<tr><td>VT-03</td><td>A 通道失效，同时 B 通道自检失败或供电中断。</td><td>及时请求 MRM；禁止驱动增扭；完成受控减速与驻车。</td></tr>
+<tr><td>VT-04</td><td>断开共享通信或时钟；清除故障码但不维修。</td><td>共性故障可检测；故障锁存；维修确认后才允许重新自检。</td></tr>
+</tbody>
+</table>
+</div>
+<div class="two-col" style="margin-top:22px;height:auto">
+<div class="plain-box"><h3>试验顺序</h3><p>模型在环 → 故障注入台架 → 封闭场地低速左转 → 按结果调整速度、转角与减速度边界。</p></div>
+<div class="plain-box"><h3>未闭合项</h3><p>机械共因、轮胎与载荷影响、时钟同步精度、MRM 停车位置和乘员冲击仍需实车数据。</p></div>
+</div>
+</div>
+<footer class="slide-foot"><span>安全验证 / 故障注入</span><span>15</span></footer>
+</section>
+<section class="slide" data-page="16">
+<header class="slide-head">
+<div><span class="label">SCENARIO LAYERS</span><h2>场景分五层展开</h2></div>
+<p>从运营环境逐层收敛到模块状态。上层决定任务是否成立，下层决定任务能否执行。</p>
+</header>
+<div class="slide-body">
+<div class="system-map" style="grid-template-columns:repeat(5,1fr)">
+<div><small>S0 / OPERATIONS</small><h3>运营与体系</h3><p>任务、ODD、调度、云控、远程协助、救援、监管与维护。</p></div>
+<div><small>S1 / ENVIRONMENT</small><h3>道路与环境</h3><p>交叉口、车道、坡度、附着、天气、光照、视野和交通参与者。</p></div>
+<div><small>S2 / MISSION</small><h3>车辆任务</h3><p>路线、左转动作、目标速度、加速度、载荷、乘员与停车位置。</p></div>
+<div><small>S3 / SYSTEM</small><h3>底盘平台</h3><p>模式、执行指令、健康状态、剩余能力、时延与时间戳。</p></div>
+<div><small>S4 / MODULE</small><h3>执行与模块</h3><p>双转向通道、制动器、驱动、悬架、传感器、电源与通信。</p></div>
+</div>
+<div class="two-col" style="margin-top:25px;height:auto">
+<div class="plain-box"><h3>向下传递</h3><p>任务选择道路与轨迹；平台把轨迹转换为运动能力；模块故障反过来限制上层任务。</p></div>
+<div class="plain-box"><h3>向上约束</h3><p>ODD 或模块能力不满足时，平台不能只报故障，还要声明还剩多少转向、制动和速度能力。</p></div>
+</div>
+</div>
+<footer class="slide-foot"><span>场景设计 / 分层</span><span>16</span></footer>
+</section>
+<section class="slide" data-page="17">
+<header class="slide-head">
+<div><span class="label">SCENE ELEMENTS</span><h2>每一层需要记录的要素</h2></div>
+<p>要素选择围绕“可能改变运动任务、能力或安全边界”的信息，避免把场景写成完整环境数据库。</p>
+</header>
+<div class="slide-body">
+<div class="requirements-table">
+<table>
+<thead><tr><th style="width:16%">层次</th><th>核心要素</th><th style="width:30%">本阶段关注点</th></tr></thead>
+<tbody>
+<tr><td>S0 运营与体系</td><td>接驳任务、站点、批准 ODD、调度策略、远程人员、救援与监管。</td><td>车辆是否被允许进入此任务，异常后由谁接收事件。</td></tr>
+<tr><td>S1 道路与环境</td><td>交叉口类型、车道宽度、坡度、附着、天气、光照、行人与非机动车、对向直行。</td><td>环境是否仍在 ODD 内，可见性和附着是否改变运动边界。</td></tr>
+<tr><td>S2 车辆任务</td><td>轨迹、曲率、目标速度、加速度、载荷、乘员状态和安全停车位置。</td><td>任务需要多少时间、空间和执行能力。</td></tr>
+<tr><td>S3 底盘平台</td><td>模式、输入请求、四类执行指令、健康状态、剩余能力、时延和日志。</td><td>系统能否实现任务，何时应限速、降级或 MRM。</td></tr>
+<tr><td>S4 执行与模块</td><td>转向双通道、制动、驱动、悬架、角度、电流、温度、压力、轮速、电源和通信。</td><td>模块状态是否足以支撑平台声明的最低能力。</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<footer class="slide-foot"><span>场景设计 / 要素</span><span>17</span></footer>
+</section>
+<section class="slide" data-page="18">
+<header class="slide-head">
+<div><span class="label">OPERATING DESIGN DOMAIN</span><h2>正常运行设计条件：运行设计范围</h2></div>
+<p>下列条件构成课程阶段的正常 ODD。超出范围时，平台应收紧授权或停止任务。</p>
+</header>
+<div class="slide-body">
+<div class="condition-table">
+<table>
+<thead><tr><th style="width:12%">类别</th><th>正常条件</th><th style="width:32%">超出条件时</th></tr></thead>
+<tbody>
+<tr><td>道路</td><td>批准的城市低速道路；信号或标志明确；车道宽 ≥ 3.25 m；坡度 ≤ 5%；左转半径 &gt; 10 m；标线可识别。</td><td>未批准路段、几何或路权不确定时拒绝任务。</td></tr>
+<tr><td>交通</td><td>混合交通；存在机动车、行人和非机动车，但其行为能在预测窗口内识别。</td><td>高密度冲突、道路封闭或无法解释的交通行为触发减速或停车。</td></tr>
+<tr><td>速度</td><td>常规 ≤ 30 km/h；典型左转 12–15 km/h；最终阈值按车型、载荷和附着标定。</td><td>超出能力声明时不得继续推进任务。</td></tr>
+<tr><td>天气与光照</td><td>道路附着良好；无积水或积雪；白天或满足照明要求的夜间。</td><td>雨雪、大雾、积水、低附着或强逆光时收紧 ODD。</td></tr>
+<tr><td>通信</td><td>云控可辅助运营，但本地控制、仲裁和 MRM 不依赖公共网络。</td><td>通信中断时保持本地能力，完成安全动作或停车。</td></tr>
+<tr><td>能量与热</td><td>高压、低压、驱动、制动与控制器温度处于供应商声明范围。</td><td>热降额、能量不足或制动能力下降时更新剩余能力。</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<footer class="slide-foot"><span>运行条件 / ODD</span><span>18</span></footer>
+</section>
+<section class="slide" data-page="19">
+<header class="slide-head">
+<div><span class="label">SYSTEM AND PEOPLE</span><h2>运行设计条件：系统状态与人员状态</h2></div>
+<p>车辆自检、能力声明和人员职责必须同时满足条件，正常任务才成立。</p>
+</header>
+<div class="slide-body">
+<div class="two-col">
+<div>
+<h3 style="margin-top:0">系统状态</h3>
+<div class="condition-table">
+<table>
+<tbody>
+<tr><td>主状态</td><td>NORMAL，无锁存故障，无未确认健康状态。</td></tr>
+<tr><td>自检</td><td>双转向、制动、驱动、悬架、传感器、电源与通信通过。</td></tr>
+<tr><td>一致性</td><td>指令、反馈和车辆响应在允许误差内；时间戳新鲜且单调。</td></tr>
+<tr><td>能力声明</td><td>给出可用转角、速度上限、制动能力、模式原因和有效时间。</td></tr>
+<tr><td>时间基准</td><td>AD 请求、平台控制、执行反馈与事件记录可核对。</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div>
+<h3 style="margin-top:0">人员状态</h3>
+<div class="condition-table">
+<table>
+<tbody>
+<tr><td>车内人员</td><td>正式运营不配驾驶员；乘客坐稳并系安全带；车门关闭。</td></tr>
+<tr><td>试验安全员</td><td>初始道路验证阶段可随车，并可使用独立急停。</td></tr>
+<tr><td>远程人员</td><td>经过培训，能读取状态、原因和处置项；同时监控车辆数须验证。</td></tr>
+<tr><td>授权边界</td><td>远程建议不得绕过本地安全约束、故障锁存和 MRM。</td></tr>
+<tr><td>运维与救援</td><td>具备隔离、断电、拖移权限，并知道如何读取危险状态。</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="key-message">正常运行的判据是“条件满足且能力已声明”，并非车辆已经上电或某个执行器在线。</div>
+</div>
+<footer class="slide-foot"><span>运行条件 / 系统与人员</span><span>19</span></footer>
+</section>
+<section class="slide" data-page="20">
+<header class="slide-head">
+<div><span class="label">TYPICAL SCENARIO</span><h2>典型实例：无保护路口低速左转</h2></div>
+<p>半载、干沥青、白天；接近 18 km/h，进入冲突区降至约 12 km/h；对向有直行车辆，右缘有等待通行的行人和非机动车。</p>
+</header>
+<div class="slide-body">
+<div class="two-col col-55-45">
+<figure class="slide-image">
+<svg aria-label="城市无保护路口低速左转场景与主要交通冲突" aria-labelledby="title desc" class="inline-illustration" role="img" viewbox="0 0 1200 760" xmlns="http://www.w3.org/2000/svg">
+<title id="title">南进口至西出口的城市路口低速左转</title>
+<desc id="desc">L4接驳车从南进口驶入无保护路口，在对向直行间隙确认后向左转入西出口；远侧人行横道有行人与非机动车。</desc>
+<rect fill="#eeece4" height="760" width="1200"></rect>
+<g fill="#284955">
+<rect height="760" width="260" x="470" y="0"></rect>
+<rect height="260" width="1200" x="0" y="250"></rect>
+</g>
+<g stroke="#e6e3d8" stroke-width="4">
+<path d="M482 0V250M718 0V250M482 510V760M718 510V760"></path>
+<path d="M0 262H470M730 262H1200M0 498H470M730 498H1200"></path>
+<path d="M600 0V250M600 510V760" opacity=".8" stroke-dasharray="26 24"></path>
+<path d="M0 380H470M730 380H1200" opacity=".8" stroke-dasharray="26 24"></path>
+</g>
+<g fill="none" stroke-linejoin="round">
+<path d="M646 710V430Q646 355 565 355H0" stroke="#d9d5c7" stroke-width="92"></path>
+<path d="M646 710V430Q646 355 565 355H0" stroke="#a45b43" stroke-width="7"></path>
+<path d="M676 715V435Q676 326 566 326H0" stroke="#d2a75f" stroke-dasharray="12 12" stroke-width="4"></path>
+</g>
+<g transform="translate(610 650)">
+<rect fill="#e7dfd3" height="118" rx="18" stroke="#244653" stroke-width="3" width="76" x="0" y="0"></rect>
+<rect fill="#718d92" height="31" rx="8" width="48" x="14" y="18"></rect>
+<circle cx="18" cy="95" fill="#a15a42" r="4"></circle>
+<circle cx="58" cy="95" fill="#a15a42" r="4"></circle>
+<text fill="#244653" font-family="Microsoft YaHei, sans-serif" font-size="16" x="-146" y="48">L4 接驳车</text>
+<text fill="#687474" font-family="Cascadia Mono, Consolas, monospace" font-size="10" x="-176" y="70">12 KM/H · NORMAL</text>
+</g>
+<g transform="translate(525 65)">
+<rect fill="#e7dfd3" height="118" rx="17" stroke="#244653" stroke-width="3" width="74"></rect>
+<rect fill="#6d868a" height="31" rx="8" width="48" x="13" y="18"></rect>
+<text fill="#244653" font-family="Microsoft YaHei, sans-serif" font-size="16" x="98" y="48">对向直行车辆</text>
+<text fill="#687474" font-family="Cascadia Mono, Consolas, monospace" font-size="10" x="98" y="70">GAP CONFIRM</text>
+</g>
+<g transform="translate(150 535)">
+<circle cx="0" cy="0" fill="#b8684d" r="12"></circle>
+<path d="M0 12V54M-14 28H15M0 54L-17 84M0 54L18 84" stroke="#b8684d" stroke-linecap="round" stroke-width="6"></path>
+<circle cx="53" cy="14" fill="none" r="17" stroke="#6d7659" stroke-width="5"></circle>
+<circle cx="105" cy="14" fill="none" r="17" stroke="#6d7659" stroke-width="5"></circle>
+<path d="M70 14H88M53 14L35 33M105 14L120 33" stroke="#6d7659" stroke-width="4"></path>
+<text fill="#4d5d5e" font-family="Microsoft YaHei, sans-serif" font-size="14" x="-8" y="118">远侧人行横道占用</text>
+</g>
+<g fill="#f8f5ed" font-family="Cascadia Mono, Consolas, monospace">
+<text font-size="13" letter-spacing="3" x="75" y="72">UNPROTECTED LEFT TURN / SOUTH → WEST</text>
+<text fill="#aebcbd" font-size="10" x="75" y="100">ODD VALID · HEALTH NORMAL · LOCAL SAFETY ACTIVE</text>
+</g>
+<g transform="translate(75 690)">
+<rect fill="#17343e" height="34" width="232"></rect>
+<text fill="#f8f5ed" font-family="Microsoft YaHei, sans-serif" font-size="12" x="16" y="22">轨迹：南进口进入，西出口驶出</text>
+<text fill="#80503d" font-family="Microsoft YaHei, sans-serif" font-size="12" x="260" y="22">冲突：对向直行间隙 / 远侧慢行占用</text>
+</g>
+</svg>
+<figcaption>12 km/h · 左转基线 · 对向直行与右侧慢行者</figcaption>
+</figure>
+<div class="event-list">
+<article><time>−8 s</time><div><h3>任务与 ODD 校验</h3><p>确认路段、天气、载荷和任务均处于批准范围。</p></div></article>
+<article><time>−5 s</time><div><h3>识别冲突空间</h3><p>AD 输出左转轨迹、对向车辆间隙与行人占用。</p></div></article>
+<article><time>−2 s</time><div><h3>平台自检</h3><p>双转向、制动、驱动、悬架健康；状态 NORMAL。</p></div></article>
+<article><time>0 s</time><div><h3>进入左转</h3><p>曲率约 0.067 m⁻¹；分配转角、制动和姿态目标。</p></div></article>
+<article><time>2–5 s</time><div><h3>轨迹跟踪</h3><p>检查实际转角、横摆、轮速和侧向加速度。</p></div></article>
+<article><time>6 s</time><div><h3>退出路口</h3><p>平滑回正，恢复目标速度并记录任务事件。</p></div></article>
+</div>
+</div>
+</div>
+<footer class="slide-foot"><span>典型场景 / 路口左转</span><span>20</span></footer>
+</section>
+<section class="slide" data-page="21">
+<header class="slide-head">
+<div><span class="label">RISK SCENARIO LIST 1</span><h2>把场景要素偏差转成风险场景</h2></div>
+<p>采用“过早、过晚、未发生、顺序错误、持续时间过长”的偏差检查。等级为课程阶段初评，需用数据验证。</p>
+</header>
+<div class="slide-body">
+<div class="risk-table">
+<table>
+<thead><tr><th style="width:8%">编号</th><th style="width:23%">风险场景</th><th style="width:23%">触发偏差</th><th style="width:22%">可能后果</th><th style="width:10%">S / P</th><th>控制方向</th></tr></thead>
+<tbody>
+<tr><td>RT-01</td><td>对向直行车辆遮挡，间隙判断过晚。</td><td>冲突识别延迟，轨迹仍进入左转。</td><td>与对向车辆侧向碰撞。</td><td>S3 / B</td><td>保留间隙不确定性；低置信度禁止进入冲突区。</td></tr>
+<tr><td>RT-02</td><td>行人或非机动车进入规划路径。</td><td>占用预测更新过晚或未进入约束。</td><td>挤压、碰撞或非预期急停。</td><td>S3 / B</td><td>限速、保留横向裕度、无法确认时停车。</td></tr>
+<tr><td>RT-03</td><td>前车在入口突然制动。</td><td>制动请求过晚；回馈与液压协同不足。</td><td>追尾、乘员冲击或阻塞路口。</td><td>S2 / B</td><td>准备制动、限制跟车时距、监测热状态。</td></tr>
+<tr><td>RT-04</td><td>湿滑路面导致车辆偏离左转路径。</td><td>附着估计偏差；扭矩和转角包线未收紧。</td><td>横向稳定性下降，越过车道边界。</td><td>S2 / B</td><td>湿滑条件退出正常 ODD；降低速度与扭矩变化率。</td></tr>
+<tr><td>RT-05</td><td>左前转向通道在进入路口时失效。</td><td>执行器开路或指令与实际角度持续不一致。</td><td>左转不足或路径突变。</td><td>S3 / B</td><td>双通道健康判断、热备接管、限速和 MRM。</td></tr>
+</tbody>
+</table>
+</div>
+<p class="small muted" style="margin:12px 0 0">S1：车内可恢复异常；S2：交通冲突或 MRM；S3：存在人员伤害或扩大事故可能。A/B/C：初步低/中/高可能性。</p>
+</div>
+<footer class="slide-foot"><span>风险分析 / 风险列表</span><span>21</span></footer>
+</section>
+<section class="slide" data-page="22">
+<header class="slide-head">
+<div><span class="label">RISK SCENARIO LIST 2</span><h2>系统故障和运营偏差同样属于风险场景</h2></div>
+<p>平台风险不只在机械失效，也包括错误状态、共因故障、能力更新滞后和远程处置误判。</p>
+</header>
+<div class="slide-body">
+<div class="risk-table">
+<table>
+<thead><tr><th style="width:8%">编号</th><th style="width:24%">风险场景</th><th style="width:24%">触发偏差</th><th style="width:22%">可能后果</th><th style="width:10%">S / P</th><th>控制方向</th></tr></thead>
+<tbody>
+<tr><td>RT-06</td><td>转向反馈卡滞，但系统仍判为 NORMAL。</td><td>通信在线；时间戳或指令一致性检查不足。</td><td>按错误过程模型继续转向。</td><td>S3 / A</td><td>新鲜度、角度、电流和车辆响应多证据判断。</td></tr>
+<tr><td>RT-07</td><td>备份通道接管产生转角或扭矩阶跃。</td><td>切换过猛；积分饱和或零位不一致。</td><td>非预期横摆或乘员伤害。</td><td>S2 / B</td><td>限扭矩和变化率、抗饱和、接管前自检。</td></tr>
+<tr><td>RT-08</td><td>双通道共享电源、时钟或通信导致共因失效。</td><td>冗余资源并未真正独立。</td><td>无转向能力且 MRM 协调受影响。</td><td>S3 / A</td><td>独立供电和时间源、共性故障检测、独立 MRM。</td></tr>
+<tr><td>RT-09</td><td>远程人员延迟确认或被错误状态误导。</td><td>状态不完整、网络延迟或越权命令。</td><td>错过停车窗口或采取不适当处置。</td><td>S2 / B</td><td>本地安全优先，状态含原因与剩余能力。</td></tr>
+<tr><td>RT-10</td><td>制动或驱动热降额，平台仍按原能力分配任务。</td><td>能力反馈过晚或未更新。</td><td>制动力不足，只能在更差位置停车。</td><td>S2 / B</td><td>持续发布热状态与能力上限；降额后重规划。</td></tr>
+</tbody>
+</table>
+</div>
+<div class="key-message">风险分析的重点从“零件是否故障”扩展到“系统是否用正确状态和剩余能力支持了当前任务”。</div>
+</div>
+<footer class="slide-foot"><span>风险分析 / 风险列表</span><span>22</span></footer>
+</section>
+<section class="slide" data-page="23">
+<header class="slide-head">
+<div><span class="label">CONTROL MAPPING</span><h2>高风险场景回到需求与验证</h2></div>
+<p>风险不是另起一套清单，而要能追溯到需求、架构和测试。</p>
+</header>
+<div class="slide-body">
+<div class="two-col col-65-35">
+<div class="trace-table">
+<table>
+<thead><tr><th style="width:15%">场景约束</th><th>约束内容</th><th style="width:26%">承接需求</th></tr></thead>
+<tbody>
+<tr><td>SCN-01</td><td>ODD、自检、健康与能力声明同时满足，才允许 NORMAL 并执行左转。</td><td>SR-02 / SR-09 / SAF-01</td></tr>
+<tr><td>SCN-02</td><td>规划轨迹超出当前转角、附着或制动能力时，平台拒绝执行并声明不可实现。</td><td>SR-08 / SR-09</td></tr>
+<tr><td>SCN-03</td><td>转向能力低于任务需求时进入 DEGRADED；无法维持最低路径能力时进入 MRM。</td><td>FR-04 / FR-05 / SAF-04</td></tr>
+<tr><td>SCN-04</td><td>能力、热状态或附着估计显著变化时，按期更新剩余能力。</td><td>SR-02 / SR-11</td></tr>
+<tr><td>SCN-05</td><td>远程协助不得覆盖本地故障锁存、安全停车和运动能力限制。</td><td>SR-03 / SR-07</td></tr>
+</tbody>
+</table>
+</div>
+<div>
+<div class="risk-matrix" style="margin-top:0">
+<div class="axis"></div><div class="axis">低</div><div class="axis">中</div><div class="axis">高</div>
+<div class="axis">S3</div><div class="cell-mid">RT-08</div><div class="cell-high"><span class="marker">RT-05</span> <span class="marker">RT-06</span></div><div class="cell-high"><span class="marker">RT-02</span></div>
+<div class="axis">S2</div><div class="cell-low">RT-10</div><div class="cell-mid"><span class="marker">RT-03</span> <span class="marker">RT-04</span></div><div class="cell-high"><span class="marker">RT-09</span></div>
+<div class="axis">S1</div><div class="cell-low"></div><div class="cell-mid"></div><div class="cell-high"></div>
+<div class="axis"></div><div class="axis">A 低</div><div class="axis">B 中</div><div class="axis">C 高</div>
+</div>
+<p class="small muted">初评矩阵用于确定优先验证顺序，不代表已接受的交通风险。</p>
+</div>
+</div>
+</div>
+<footer class="slide-foot"><span>风险分析 / 控制映射</span><span>23</span></footer>
+</section>
+<section class="slide" data-page="24">
+<header class="slide-head">
+<div><span class="label">END-TO-END TRACE</span><h2>从系统定义到运行验证形成闭环</h2></div>
+<p>每一项结论都能进入下一阶段，避免汇报时只堆材料而没有系统主线。</p>
+</header>
+<div class="slide-body">
+<div class="timeline" style="grid-template-columns:repeat(4,1fr)">
+<article><time>01 层级</time><h3>确定系统层级</h3><p>线控底盘平台位于 Systems 层，承接整车运动目标，组织四类执行子系统。</p></article>
+<article><time>02 需求</time><h3>形成需求来源</h3><p>BR-02、BR-07 与 SR-09、SR-10 共同要求故障可控、能力可声明、证据可追溯。</p></article>
+<article><time>03 架构</time><h3>定义系统响应</h3><p>通过 FR、PR、DR、SC 和初始架构形成检测、接管、降级、MRM 和验证路径。</p></article>
+<article><time>04 场景</time><h3>检查运行有效性</h3><p>把需求和架构放入路口左转场景，检查 ODD、人员状态、典型过程与风险场景。</p></article>
+</div>
+<div class="condition-table" style="margin-top:30px">
+<table>
+<thead><tr><th style="width:16%">汇报问题</th><th>本组回答</th><th style="width:31%">尚需确认</th></tr></thead>
+<tbody>
+<tr><td>系统是什么</td><td>面向整车运动的系统级平台，不是单一执行器集合。</td><td>车型范围、整车接口与供应商边界。</td></tr>
+<tr><td>为什么需要</td><td>无人化运营需要补回人工最终容错，并支持跨车型复用。</td><td>运营目标、法规准入和成本约束。</td></tr>
+<tr><td>怎样保证安全</td><td>健康监测、双通道接管、能力声明、锁存、MRM 与证据记录。</td><td>阈值、独立性和 MRM 停车位置需验证。</td></tr>
+<tr><td>在哪些场景有效</td><td>城市低速道路和受控路口左转，超出 ODD 时退出或停车。</td><td>复杂交通、恶劣天气和真实故障率数据。</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<footer class="slide-foot"><span>完整链路 / 需求追溯</span><span>24</span></footer>
+</section>
+<section class="slide" data-page="25">
+<header class="slide-head">
+<div><span class="label">CONCLUSION</span><h2>结论</h2></div>
+<p>本报告形成一条连续的系统设计与运行分析主线，并明确当前可以确认和仍待验证的内容。</p>
+</header>
+<div class="slide-body">
+<div class="three-col" style="height:auto">
+<div class="plain-box"><h3>系统工程主线</h3><p>从任务与体系出发确定平台边界，再通过 BRS、StRS、SyRS 和安全架构把目标变成可实现、可验证的要求。</p></div>
+<div class="plain-box"><h3>安全设计重点</h3><p>未知状态不授权正常执行；故障要锁存；备份接管要保持指令连续；无法维持最低能力时进入 MRM。</p></div>
+<div class="plain-box"><h3>场景分析重点</h3><p>正常任务必须同时满足 ODD、系统健康和人员职责条件。风险来自场景偏差、能力更新滞后和错误状态。</p></div>
+</div>
+<h3 style="margin-top:30px">参考与说明</h3>
+<ol class="source-list">
+<li>ISO/IEC/IEEE 29148:2018，Requirements engineering。</li>
+<li>ISO/IEC/IEEE 15288:2023，System life cycle processes。</li>
+<li>STPA Handbook，Leveson &amp; Thomas，2018。</li>
+<li>本报告参数均为课程情景基线，不作为量产、法规或安全认证结论。</li>
+</ol>
+<div class="key-message contrast" style="margin-top:26px">下一步：与整车和感知团队确认量化阈值，并按仿真、HIL、封闭场地的顺序完成验证。</div>
+</div>
+<footer class="slide-foot"><span>H2905 · Complex Systems Engineering · 2026</span><span>25</span></footer>
+</section>
+</main>
+</div>
+<nav aria-label="汇报控制" class="deck-controls">
+<a href="../" title="返回课程主页">目录</a>
+<button data-prev="" title="上一页" type="button">←</button>
+<span class="counter">01 / 25</span>
+<button data-next="" title="下一页" type="button">→</button>
+<button data-print="" title="打印或另存为 PDF" type="button">打印</button>
+</nav>
+<div aria-hidden="true" class="progress"><span></span></div>
+<script src="../assets/report.js"></script>
 </body>
 </html>
