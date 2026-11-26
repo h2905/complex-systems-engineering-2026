@@ -1126,6 +1126,168 @@ table tbody tr:hover {
   }
 }
 
+/* Dark content surfaces continue the cover art direction */
+body {
+  color: #edf5f1;
+  background: #061715;
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  height: auto;
+  background:
+    linear-gradient(rgba(3, 16, 15, 0.82), rgba(4, 21, 19, 0.9)),
+    url("./images/nebula-field.svg") center / cover no-repeat;
+}
+
+body::after {
+  display: none;
+}
+
+.section {
+  color: #edf5f1;
+  background: transparent;
+}
+
+.section-head h2,
+.section-brand,
+.entry h3,
+.report-banner,
+.report-banner h3 {
+  color: #f4f8f6;
+}
+
+.section-head p,
+.entry p,
+.entry-meta,
+.report-banner p,
+.section-brand small,
+.site-footer {
+  color: rgba(222, 237, 231, 0.6);
+}
+
+.section-brand-mark {
+  color: #062018;
+  border-color: #91e6b9;
+  background: #91e6b9;
+}
+
+.entry-grid,
+.entry,
+.report-banner,
+.site-footer {
+  border-color: rgba(185, 224, 211, 0.16);
+}
+
+.entry {
+  background: transparent;
+}
+
+.entry:hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.entry-foot {
+  color: rgba(237, 245, 241, 0.86);
+}
+
+.doc-section {
+  color: #edf5f1;
+  border-top-color: rgba(185, 224, 211, 0.16);
+}
+
+.doc-section::before {
+  background: rgba(185, 224, 211, 0.16);
+}
+
+.doc-section h2,
+.doc-section h3,
+.summary-grid strong,
+.flow-step strong,
+.status-line strong,
+.layer-list strong,
+.box h3 {
+  color: #f3f8f5;
+}
+
+.doc-section p,
+.doc-section li,
+.summary-grid p,
+.flow-step p,
+.layer-list span,
+.box p,
+.doc-section .muted {
+  color: rgba(219, 235, 229, 0.68);
+}
+
+.summary-grid,
+.summary-grid > div,
+.flow,
+.flow-step,
+.status-line,
+.status-line div,
+.layer-list,
+.layer-list li,
+.table-wrap,
+.doc-section th,
+.doc-section td {
+  border-color: rgba(185, 224, 211, 0.16);
+}
+
+.summary-grid > div,
+.flow,
+.flow-step,
+.status-line,
+.box,
+.doc-section .note {
+  background: rgba(4, 23, 21, 0.46);
+}
+
+.summary-grid small,
+.flow-step small,
+.layer-list b,
+.status-line small {
+  color: var(--page-accent);
+}
+
+.doc-section th {
+  color: rgba(237, 245, 241, 0.76);
+  background: rgba(1, 16, 15, 0.64);
+}
+
+.doc-section td {
+  color: #e8f1ed;
+}
+
+.doc-section tbody tr:hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.site-header.scrolled {
+  color: #edf5f1;
+  background: rgba(4, 20, 18, 0.96);
+}
+
+.site-header.scrolled .site-nav {
+  color: rgba(226, 240, 234, 0.65);
+}
+
+.site-header.scrolled .site-nav a:hover,
+.site-header.scrolled .site-nav a[aria-current="page"] {
+  color: #9ce8bf;
+}
+
+.doc-nav {
+  color: rgba(222, 237, 231, 0.6);
+  border-top-color: rgba(185, 224, 211, 0.16);
+}
+
+.doc-nav a:hover {
+  color: #9ce8bf;
+}
+
 /* 2026-11 visual direction: cinematic engineering index */
 :root {
   --paper: #e9f0ee;
@@ -1532,4 +1694,170 @@ main,
     justify-content: flex-start;
     margin-top: 0;
   }
+}
+
+/* Final content treatment: same visual system as the cinematic hero */
+html,
+body {
+  background: #061715;
+}
+
+body {
+  color: #edf5f1;
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  height: auto;
+  background:
+    linear-gradient(rgba(3, 16, 15, 0.82), rgba(4, 21, 19, 0.9)),
+    url("./images/nebula-field.svg") center / cover no-repeat;
+}
+
+body::after {
+  display: none;
+}
+
+.section {
+  color: #edf5f1;
+  background: transparent;
+}
+
+.section-head h2,
+.section-brand,
+.entry h3,
+.report-banner,
+.report-banner h3 {
+  color: #f4f8f6;
+}
+
+.section-head p,
+.entry p,
+.entry-meta,
+.report-banner p,
+.section-brand small,
+.site-footer {
+  color: rgba(222, 237, 231, 0.62);
+}
+
+.section-brand-mark {
+  color: #062018;
+  border-color: #91e6b9;
+  background: #91e6b9;
+}
+
+.entry-grid,
+.entry,
+.report-banner,
+.site-footer {
+  border-color: rgba(185, 224, 211, 0.17);
+}
+
+.entry {
+  background: transparent;
+}
+
+.entry:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.entry-foot {
+  color: rgba(237, 245, 241, 0.9);
+}
+
+.doc-section {
+  color: #edf5f1;
+  border-top-color: rgba(185, 224, 211, 0.16);
+}
+
+.doc-section::before {
+  background: rgba(185, 224, 211, 0.16);
+}
+
+.doc-section h2,
+.doc-section h3,
+.summary-grid strong,
+.flow-step strong,
+.status-line strong,
+.layer-list strong,
+.box h3 {
+  color: #f3f8f5;
+}
+
+.doc-section p,
+.doc-section li,
+.summary-grid p,
+.flow-step p,
+.layer-list span,
+.box p,
+.doc-section .muted {
+  color: rgba(219, 235, 229, 0.7);
+}
+
+.summary-grid,
+.summary-grid > div,
+.flow,
+.flow-step,
+.status-line,
+.status-line div,
+.layer-list,
+.layer-list li,
+.table-wrap,
+.doc-section th,
+.doc-section td {
+  border-color: rgba(185, 224, 211, 0.16);
+}
+
+.summary-grid > div,
+.flow,
+.flow-step,
+.status-line,
+.box,
+.doc-section .note {
+  background: rgba(4, 23, 21, 0.47);
+}
+
+.summary-grid small,
+.flow-step small,
+.layer-list b,
+.status-line small {
+  color: var(--page-accent);
+}
+
+.doc-section th {
+  color: rgba(237, 245, 241, 0.78);
+  background: rgba(1, 16, 15, 0.64);
+}
+
+.doc-section td {
+  color: #e8f1ed;
+}
+
+.doc-section tbody tr:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.site-header.scrolled {
+  color: #edf5f1;
+  background: rgba(4, 20, 18, 0.96);
+}
+
+.site-header.scrolled .site-nav {
+  color: rgba(226, 240, 234, 0.66);
+}
+
+.site-header.scrolled .site-nav a:hover,
+.site-header.scrolled .site-nav a[aria-current="page"] {
+  color: #9ce8bf;
+}
+
+.doc-nav {
+  color: rgba(222, 237, 231, 0.62);
+  border-top-color: rgba(185, 224, 211, 0.16);
+}
+
+.doc-nav a:hover {
+  color: #9ce8bf;
 }

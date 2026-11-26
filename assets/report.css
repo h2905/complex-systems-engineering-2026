@@ -1191,3 +1191,239 @@ button {
     animation: none;
   }
 }
+
+/* Dark presentation system aligned with the cover */
+:root {
+  --paper: #071817;
+  --paper-2: #102a27;
+  --white: #f4f8f5;
+  --ink: #edf5f1;
+  --muted: #9aadaa;
+  --line: rgba(185, 224, 211, 0.2);
+  --navy: #8ce5b4;
+  --navy-soft: rgba(63, 157, 117, 0.18);
+  --rust: #dc9679;
+  --sage: #9bc6ae;
+  --gold: #d4ba7c;
+  --steel: #70c6cb;
+  --clay: #d88968;
+  --olive: #9ebca3;
+  --ochre: #d4b06f;
+}
+
+body {
+  background:
+    radial-gradient(circle at 50% 12%, rgba(46, 128, 104, 0.16), transparent 38%),
+    #081715;
+}
+
+.deck-stage {
+  border-color: rgba(185, 224, 211, 0.18);
+  background: var(--paper);
+  box-shadow: 0 26px 78px rgba(0, 0, 0, 0.42);
+}
+
+.slide {
+  color: var(--ink);
+  background:
+    linear-gradient(rgba(4, 19, 18, 0.72), rgba(5, 23, 22, 0.8)),
+    url("./images/nebula-field.svg") center / cover no-repeat;
+}
+
+.slide::before {
+  color: rgba(225, 240, 234, 0.58);
+  border-right-color: rgba(185, 224, 211, 0.18);
+  background:
+    linear-gradient(var(--accent) 0 42px, transparent 42px),
+    rgba(1, 12, 12, 0.36);
+}
+
+.slide::after {
+  color: rgba(220, 237, 231, 0.48);
+}
+
+.slide-head {
+  border-bottom-color: var(--line);
+}
+
+.slide-head p,
+.small.muted {
+  color: var(--muted);
+}
+
+.slide-head .label {
+  color: var(--accent);
+}
+
+.slide-foot {
+  color: rgba(212, 230, 224, 0.55);
+  border-top-color: var(--line);
+}
+
+.slide-foot span:last-child {
+  color: var(--accent);
+}
+
+.plain-box {
+  border-color: var(--line);
+  background: rgba(3, 20, 18, 0.58);
+}
+
+.plain-box p,
+.plain-box ul {
+  color: var(--muted);
+}
+
+.key-message {
+  color: var(--ink);
+  border-left-color: var(--accent);
+  background: linear-gradient(90deg, rgba(69, 139, 111, 0.18), rgba(5, 22, 20, 0.58) 55%);
+}
+
+.key-message.contrast {
+  color: #f7fbf8;
+  border-left-color: #d79578;
+  background: #183632;
+}
+
+.system-map,
+.arrow-row .node,
+.requirements-table th,
+.requirements-table td,
+.risk-table th,
+.risk-table td,
+.trace-table th,
+.trace-table td,
+.condition-table th,
+.condition-table td {
+  border-color: var(--line);
+}
+
+.system-map div {
+  background: rgba(4, 23, 21, 0.56);
+}
+
+.system-map div::after {
+  border-color: var(--accent);
+  background: #0b2421;
+}
+
+.system-map h3,
+.arrow-row .node strong,
+.requirements-table td,
+.risk-table td,
+.trace-table td,
+.condition-table td {
+  color: var(--ink);
+}
+
+.system-map p,
+.arrow-row .node span {
+  color: var(--muted);
+}
+
+.requirements-table th,
+.risk-table th,
+.trace-table th,
+.condition-table th {
+  color: rgba(237, 245, 241, 0.76);
+  background: rgba(1, 16, 15, 0.62);
+}
+
+.requirements-table td:first-child,
+.risk-table td:first-child,
+.trace-table td:first-child,
+.condition-table td:first-child {
+  color: var(--accent);
+}
+
+.state-strip {
+  border-top-color: rgba(210, 233, 225, 0.42);
+  border-bottom-color: var(--line);
+}
+
+.state-strip div {
+  border-right-color: var(--line);
+}
+
+.slide-image {
+  border-color: var(--line);
+  background: rgba(3, 20, 18, 0.62);
+}
+
+.slide-image figcaption {
+  color: var(--muted);
+  border-top-color: var(--line);
+}
+
+.compact-list,
+.event-list {
+  border-top-color: rgba(210, 233, 225, 0.42);
+}
+
+.compact-list article,
+.event-list article {
+  border-bottom-color: var(--line);
+}
+
+.compact-list p,
+.event-list p {
+  color: var(--muted);
+}
+
+.event-list article::before {
+  background: #0a2320;
+}
+
+.risk-matrix,
+.risk-matrix > div {
+  border-color: var(--line);
+}
+
+.risk-matrix .cell-low {
+  background: rgba(92, 139, 117, 0.1);
+}
+
+.risk-matrix .cell-mid {
+  background: rgba(155, 123, 60, 0.14);
+}
+
+.risk-matrix .cell-high {
+  background: rgba(185, 91, 69, 0.18);
+}
+
+.risk-matrix .marker {
+  background: rgba(3, 18, 17, 0.82);
+}
+
+.source-list {
+  color: var(--muted);
+}
+
+.cover {
+  background:
+    linear-gradient(90deg, rgba(1, 13, 13, 0.28), rgba(1, 13, 13, 0.04) 64%, rgba(1, 13, 13, 0.24)),
+    url("./images/nebula-field.svg") center / cover no-repeat;
+}
+
+.cover-meta small {
+  color: rgba(214, 233, 226, 0.52);
+}
+
+.cover-meta strong {
+  color: rgba(247, 251, 249, 0.9);
+}
+
+@media print {
+  html,
+  body {
+    background: #071817;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .slide {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
