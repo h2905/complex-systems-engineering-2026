@@ -72,7 +72,7 @@ button {
   inset: 0;
   display: none;
   flex-direction: column;
-  padding: 44px 64px 38px;
+  padding: 44px 64px 38px 90px;
   background:
     radial-gradient(circle at 100% 0, rgba(78, 134, 146, 0.08), transparent 30%),
     linear-gradient(135deg, #fbfdfd 0%, #f4f8f9 62%, #eaf1f3 100%);
@@ -194,13 +194,22 @@ button {
 
 .slide::before {
   position: absolute;
-  top: 26px;
-  left: 64px;
-  color: #818987;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 44px;
+  padding-top: 26px;
+  color: #728286;
+  border-right: 1px solid var(--line);
+  background:
+    linear-gradient(var(--accent) 0 42px, transparent 42px),
+    rgba(255, 255, 255, 0.25);
   font-family: var(--mono);
   font-size: 9px;
-  letter-spacing: 0.08em;
-  content: "复杂系统工程 · 线控底盘平台系统设计与运行分析";
+  letter-spacing: 0.14em;
+  text-align: center;
+  writing-mode: vertical-rl;
+  content: "COMPLEX SYSTEMS / " attr(data-page);
 }
 
 .slide::after {
@@ -216,16 +225,24 @@ button {
 
 .cover {
   justify-content: center;
-  padding: 72px 72px 66px 92px;
+  padding: 72px 72px 66px 120px;
   padding-right: 470px;
   background:
-    radial-gradient(circle at 20% 20%, rgba(65, 132, 146, 0.08), transparent 30%),
-    linear-gradient(135deg, #fbfdfd 0%, #f2f7f8 68%, #e7f0f2 100%);
+    linear-gradient(90deg, rgba(1, 13, 13, 0.34), rgba(1, 13, 13, 0.08) 65%, rgba(1, 13, 13, 0.32)),
+    url("./images/nebula-field.svg") center / cover no-repeat;
 }
 
 .cover::before {
-  top: 42px;
-  left: 92px;
+  padding-top: 42px;
+  color: rgba(230, 243, 238, 0.62);
+  border-right-color: rgba(185, 226, 212, 0.18);
+  background:
+    linear-gradient(#8ce5b4 0 42px, transparent 42px),
+    rgba(0, 0, 0, 0.18);
+}
+
+.cover::after {
+  color: rgba(230, 243, 238, 0.46);
 }
 
 .cover > :not(.cover-visual) {
@@ -244,9 +261,9 @@ button {
   height: 360px;
   margin: 0;
   overflow: hidden;
-  border: 1px solid var(--line);
-  background: #17343e;
-  box-shadow: 0 18px 42px rgba(35, 59, 66, 0.16);
+  border: 1px solid rgba(184, 229, 215, 0.24);
+  background: rgba(4, 24, 24, 0.72);
+  box-shadow: 0 22px 56px rgba(0, 0, 0, 0.3);
 }
 
 .cover-visual img,
@@ -291,17 +308,18 @@ button {
   font-weight: 700;
   line-height: 1.16;
   letter-spacing: -0.045em;
+  color: #f4f8f5;
 }
 
 .cover h1 span {
   display: block;
-  color: var(--navy);
+  color: #8ce5b4;
 }
 
 .cover-subtitle {
   max-width: 620px;
   margin: 26px 0 0;
-  color: var(--muted);
+  color: rgba(226, 239, 235, 0.7);
   font-size: 18px;
   line-height: 1.8;
 }
@@ -323,45 +341,46 @@ button {
 }
 
 .cover-trace b {
-  color: var(--steel);
+  color: #8ce5b4;
   font-family: var(--mono);
   font-size: 9px;
   font-weight: 500;
 }
 
 .cover-trace span:nth-of-type(2) b {
-  color: var(--clay);
+  color: #d59578;
 }
 
 .cover-trace span:nth-of-type(3) b {
-  color: var(--olive);
+  color: #b8d7bb;
 }
 
 .cover-trace span:nth-of-type(4) b {
-  color: var(--ochre);
+  color: #d8bd7e;
 }
 
 .cover-trace em {
   font-size: 11px;
   font-style: normal;
+  color: rgba(239, 247, 243, 0.78);
 }
 
 .cover-trace i {
   height: 1px;
-  background: var(--line);
+  background: rgba(205, 235, 224, 0.22);
 }
 
 .cover-meta {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-top: 30px;
-  border-top: 1px solid var(--ink);
-  border-bottom: 1px solid var(--line);
+  border-top: 1px solid rgba(205, 235, 224, 0.42);
+  border-bottom: 1px solid rgba(205, 235, 224, 0.16);
 }
 
 .cover-meta div {
   padding: 14px 18px;
-  border-right: 1px solid var(--line);
+  border-right: 1px solid rgba(205, 235, 224, 0.15);
 }
 
 .cover-meta div:first-child {
@@ -382,11 +401,16 @@ button {
   letter-spacing: 0.06em;
 }
 
+.cover-meta small {
+  color: rgba(214, 233, 226, 0.52);
+}
+
 .cover-meta strong {
   display: block;
   margin-top: 5px;
   font-size: 14px;
   font-weight: 600;
+  color: rgba(247, 251, 249, 0.9);
 }
 
 .slide-head {
