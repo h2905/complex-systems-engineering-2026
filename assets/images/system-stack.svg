@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 620" role="img" aria-labelledby="title desc">
+  <title id="title">线控底盘平台六层系统结构</title>
+  <desc id="desc">从任务、体系、整车到系统、子系统和模块的层级结构，系统层作为集成平台被突出显示。</desc>
+  <rect width="620" height="620" fill="#17343e"/>
+  <g opacity=".12" stroke="#b9c8c8" stroke-width="1">
+    <path d="M0 80H620M0 160H620M0 240H620M0 320H620M0 400H620M0 480H620M0 560H620"/>
+    <path d="M80 0V620M160 0V620M240 0V620M320 0V620M400 0V620M480 0V620M560 0V620"/>
+  </g>
+  <text x="42" y="54" fill="#f5f1e8" font-family="Cascadia Mono, Consolas, monospace" font-size="12" letter-spacing="3">SYSTEM STACK / 06</text>
+  <g font-family="Microsoft YaHei, sans-serif">
+    <g transform="translate(92 92)">
+      <rect width="440" height="58" fill="#203f49" stroke="#648087"/>
+      <text x="20" y="23" fill="#8ea5a7" font-family="Cascadia Mono, Consolas, monospace" font-size="9">L1 / MISSION</text>
+      <text x="20" y="45" fill="#f3efe6" font-size="17">任务 · 无人化出行</text>
+    </g>
+    <g transform="translate(78 164)">
+      <rect width="468" height="58" fill="#203f49" stroke="#648087"/>
+      <text x="20" y="23" fill="#8ea5a7" font-family="Cascadia Mono, Consolas, monospace" font-size="9">L2 / SYSTEM OF SYSTEMS</text>
+      <text x="20" y="45" fill="#f3efe6" font-size="17">体系 · 车队与道路协同</text>
+    </g>
+    <g transform="translate(64 236)">
+      <rect width="496" height="58" fill="#203f49" stroke="#648087"/>
+      <text x="20" y="23" fill="#8ea5a7" font-family="Cascadia Mono, Consolas, monospace" font-size="9">L3 / VEHICLE</text>
+      <text x="20" y="45" fill="#f3efe6" font-size="17">整车 · 轨迹与安全边界</text>
+    </g>
+    <g transform="translate(42 308)">
+      <rect width="536" height="74" fill="#e7e4d8" stroke="#c8a36a" stroke-width="2"/>
+      <text x="20" y="25" fill="#8b5b42" font-family="Cascadia Mono, Consolas, monospace" font-size="9">L4 / SYSTEMS · SELECTED</text>
+      <text x="20" y="52" fill="#183743" font-size="20" font-weight="700">系统 · 线控底盘平台</text>
+      <circle cx="502" cy="37" r="8" fill="none" stroke="#9c5a41" stroke-width="2"/>
+      <path d="M498 37H506M502 33V41" stroke="#9c5a41" stroke-width="1.5"/>
+    </g>
+    <g transform="translate(56 396)">
+      <rect width="512" height="58" fill="#203f49" stroke="#648087"/>
+      <text x="20" y="23" fill="#8ea5a7" font-family="Cascadia Mono, Consolas, monospace" font-size="9">L5 / SUBSYSTEMS</text>
+      <text x="20" y="45" fill="#f3efe6" font-size="17">子系统 · 转向 / 制动 / 驱动 / 悬架</text>
+    </g>
+    <g transform="translate(70 468)">
+      <rect width="484" height="58" fill="#203f49" stroke="#648087"/>
+      <text x="20" y="23" fill="#8ea5a7" font-family="Cascadia Mono, Consolas, monospace" font-size="9">L6 / MODULES</text>
+      <text x="20" y="45" fill="#f3efe6" font-size="17">模块 · 执行器 / 传感器 / 控制器</text>
+    </g>
+  </g>
+  <g fill="none" stroke="#9db0af" stroke-width="1.5">
+    <path d="M310 150V164M310 222V236M310 294V308M310 382V396M310 454V468"/>
+  </g>
+  <g fill="none" stroke="#c48b69" stroke-width="1.5">
+    <path d="M42 345H20V525H280"/>
+    <circle cx="280" cy="525" r="4"/>
+  </g>
+  <text x="42" y="580" fill="#91a5a6" font-family="Cascadia Mono, Consolas, monospace" font-size="9">TRACEABILITY: TASK → SYSTEM → EXECUTION</text>
+</svg>

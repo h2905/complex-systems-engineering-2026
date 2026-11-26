@@ -19,13 +19,17 @@
   <main class="wrap">
     <header class="doc-hero">
       <p class="doc-kicker">Assignment 03 · SyRS, architecture and STPA</p>
-      <h1>左前转向通道失效下的系统需求与安全架构</h1>
+      <h1>左前转向通道失效下的<br>系统需求与安全架构</h1>
       <p class="doc-lead">
         为使需求可验证，本作业把研究对象限定为“15 km/h 城市路口低速左转过程中左前转向执行通道失效”。分析范围覆盖故障检测、仲裁、热备接管、能力声明、MRM 和证据记录。
       </p>
       <div class="doc-meta">
         <span>场景：15 km/h 左转</span><span>故障：左前通道失效</span><span>架构：双通道 + 独立监控</span><span>方法：SyRS / STPA</span>
       </div>
+      <figure class="doc-visual">
+        <img src="../../assets/images/fail-operational-architecture.svg" alt="双通道转向、独立健康判断、锁存仲裁与最小风险机动架构">
+        <figcaption>FAIL-OPERATIONAL / 单通道失效后的控制路径</figcaption>
+      </figure>
     </header>
 
     <section class="doc-section">
@@ -124,5 +128,6 @@
       <a href="../../">← 返回四次作业</a>
     </nav>
   </main>
+  <script src="../../assets/site.js"></script>
 </body>
 </html>

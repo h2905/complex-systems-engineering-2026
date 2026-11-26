@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 620" role="img" aria-labelledby="title desc">
+  <title id="title">运营概念与需求定义闭环</title>
+  <desc id="desc">从ConOps、OpsCon到BRS和StRS，再进入场景、验证和运营反馈的闭环。</desc>
+  <rect width="620" height="620" fill="#17343e"/>
+  <g opacity=".12" stroke="#b9c8c8" stroke-width="1">
+    <path d="M0 80H620M0 160H620M0 240H620M0 320H620M0 400H620M0 480H620M0 560H620"/>
+    <path d="M80 0V620M160 0V620M240 0V620M320 0V620M400 0V620M480 0V620M560 0V620"/>
+  </g>
+  <text x="42" y="54" fill="#f5f1e8" font-family="Cascadia Mono, Consolas, monospace" font-size="12" letter-spacing="3">REQUIREMENT LOOP</text>
+  <g font-family="Microsoft YaHei, sans-serif">
+    <g transform="translate(54 94)">
+      <rect width="206" height="112" fill="#21404a" stroke="#6d878b"/>
+      <text x="18" y="30" fill="#aababb" font-family="Cascadia Mono, Consolas, monospace" font-size="9">CONOPS</text>
+      <text x="18" y="59" fill="#f3efe6" font-size="18">运营概念</text>
+      <text x="18" y="83" fill="#aebcbd" font-size="11">业务如何运转</text>
+    </g>
+    <g transform="translate(358 94)">
+      <rect width="208" height="112" fill="#21404a" stroke="#6d878b"/>
+      <text x="18" y="30" fill="#aababb" font-family="Cascadia Mono, Consolas, monospace" font-size="9">OPSCON</text>
+      <text x="18" y="59" fill="#f3efe6" font-size="18">系统运行概念</text>
+      <text x="18" y="83" fill="#aebcbd" font-size="11">系统如何使用</text>
+    </g>
+    <g transform="translate(54 294)">
+      <rect width="206" height="112" fill="#e6e3d7"/>
+      <text x="18" y="30" fill="#8c5a43" font-family="Cascadia Mono, Consolas, monospace" font-size="9">BRS</text>
+      <text x="18" y="59" fill="#183743" font-size="18">业务需求</text>
+      <text x="18" y="83" fill="#647071" font-size="11">为什么值得做</text>
+    </g>
+    <g transform="translate(358 294)">
+      <rect width="208" height="112" fill="#d9ddcf"/>
+      <text x="18" y="30" fill="#5e6e61" font-family="Cascadia Mono, Consolas, monospace" font-size="9">STRS</text>
+      <text x="18" y="59" fill="#183743" font-size="18">相关方需求</text>
+      <text x="18" y="83" fill="#647071" font-size="11">需要系统做到什么</text>
+    </g>
+    <g transform="translate(168 466)">
+      <rect width="284" height="88" fill="#b9684e"/>
+      <text x="22" y="29" fill="#f7e9e2" font-family="Cascadia Mono, Consolas, monospace" font-size="9">BASELINE / VERIFY</text>
+      <text x="22" y="58" fill="#fffaf2" font-size="18">需求基线 → 场景验证</text>
+    </g>
+  </g>
+  <g fill="none" stroke="#97adaf" stroke-width="2">
+    <path d="M260 150H358M462 150V214Q462 244 432 244H188Q158 244 158 274V294"/>
+    <path d="M260 350H358M310 406V466"/>
+  </g>
+  <g fill="#c88a69">
+    <path d="M350 144L362 150L350 156Z"/>
+    <path d="M152 286L158 298L164 286Z"/>
+    <path d="M304 458L310 470L316 458Z"/>
+  </g>
+  <g fill="none" stroke="#c48b69" stroke-width="1.5">
+    <path d="M462 350V430H548V554H310V554"/>
+    <circle cx="310" cy="554" r="4"/>
+  </g>
+  <text x="42" y="590" fill="#91a5a6" font-family="Cascadia Mono, Consolas, monospace" font-size="9">CONTEXT → NEEDS → REQUIREMENTS → EVIDENCE</text>
+</svg>
